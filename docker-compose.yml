@@ -1,0 +1,22 @@
+version: '2'
+services:
+  microservice-jenius-bot:
+    build:
+      context: .
+      args:
+        - SERVICE_NAME=microservice-jenius-bot
+        - NPM_REGISTRY
+        - NPM_TOKEN
+        - HTTP_PROXY
+        - HTTPS_PROXY
+    environment:
+      - SERVICE_PORT=3000
+      - WAIT_START=1
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis-store
+  redis-store:
+    image: redis
+    ports:
+      - 6379:6379
