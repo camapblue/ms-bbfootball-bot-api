@@ -1,5 +1,5 @@
-const BotUser = require('./models/bot-user');
 const Routes = require('./routes');
+const { createLogger, format, transports } = require('winston');
 
 const internals = {};
 
@@ -9,10 +9,17 @@ internals.applyRoutes = (server, next) => {
 };
 
 exports.register = (server, opts, next) => {
-  const botUser = new BotUser();
+  const logger = createLogger({
+    format: format.combine(
+      format.splat(),
+      format.simple()
+    ),
+    transports: [new transports.Console()]
+  });  
 
   server.ext('onPreHandler', (request, reply) => {
-    Object.assign(request.server, { botUser });
+    request.server.logger = logger;
+    Object.assign(request.server);
     reply.continue();
   });
 

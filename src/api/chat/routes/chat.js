@@ -29,7 +29,7 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { services: { logger } } = this.options;
+      const { server: { logger } } = req;
 
       const chat = new Chat({ logger });
       const { appFbId, message } = req.payload;

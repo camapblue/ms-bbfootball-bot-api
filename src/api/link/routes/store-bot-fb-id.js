@@ -32,7 +32,7 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { services: { logger } } = this.options;
+      const { server: { logger } } = req;
 
       const botUser = new BotUser({ logger });
       const { username, code, botFbId } = req.payload;

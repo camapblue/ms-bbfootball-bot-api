@@ -8,24 +8,34 @@
     "dev": "backpack | bunyan",
     "lint": "eslint src test config"
   },
-  "author": "HieuVP",
+  "author": "King Bon",
   "license": "ISC",
+  "keywords": [
+    "bbfootball",
+    "bot api",
+    "heroku"
+  ],
+  "engines": {
+    "node": "6.11.0"
+  },
   "dependencies": {
     "backpack-core": "^0.4.2",
+    "bluebird": "^3.5.0",
     "boom": "^5.2.0",
     "bunyan": "^1.8.12",
     "confidence": "^3.0.2",
+    "crypto": "^0.0.3",
     "es6-error": "^4.0.2",
     "fcm-node": "^1.2.0",
     "hapi": "^16.5.2",
     "hapi-swagger": "^7.7.0",
     "inert": "^4.2.1",
     "joi": "^10.6.0",
-    "vision": "^4.1.1",
-    "crypto": "^0.0.3",
-    "redis": "^2.6.5",
     "moment": "^2.18.0",
-    "bluebird": "^3.5.0"
+    "mongoose": "4.9.5",
+    "redis": "^2.6.5",
+    "vision": "^4.1.1",
+    "winston": "^3.0.0-rc0"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",

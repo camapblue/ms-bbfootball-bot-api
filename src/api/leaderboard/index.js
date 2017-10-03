@@ -1,4 +1,5 @@
 const Routes = require('./routes');
+const DBConnector = require('../../connector/db');
 const { createLogger, format, transports } = require('winston');
 
 const internals = {};
@@ -9,6 +10,10 @@ internals.applyRoutes = (server, next) => {
 };
 
 exports.register = (server, opts, next) => {
+  const { config } = opts;
+  const dbCon = new DBConnector(config.resources.db);
+  dbCon.createSchemas();
+
   const logger = createLogger({
     format: format.combine(
       format.splat(),
@@ -19,8 +24,19 @@ exports.register = (server, opts, next) => {
 
   server.ext('onPreHandler', (request, reply) => {
     request.server.logger = logger;
+    request.server.dbCon = dbCon;
     Object.assign(request.server);
     reply.continue();
+  });
+
+  server.on('start', () => {
+    dbCon.connect()
+    .then(() => {
+      console.log('Start DB Connection SUCCESSFUL');
+    })
+    .catch((err) => {
+      throw err;
+    });
   });
 
   server.dependency([
@@ -31,5 +47,5 @@ exports.register = (server, opts, next) => {
 };
 
 exports.register.attributes = {
-  name: 'chat'
+  name: 'leaderboard'
 };

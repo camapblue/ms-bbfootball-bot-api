@@ -5,6 +5,7 @@ const Config = require('../config');
 const swagger = require('./api/swagger');
 const chat = require('./api/chat');
 const link = require('./api/link');
+const leaderboard = require('./api/leaderboard');
 
 const server = new hapi.Server();
 
@@ -34,6 +35,13 @@ const plugins = [
   },
   {
     register: chat,
+    select: ['api', 'docs', 'chat'],
+    options: {
+      config: Config.get('/')
+    }
+  },
+  {
+    register: leaderboard,
     select: ['api', 'docs', 'chat'],
     options: {
       config: Config.get('/')
