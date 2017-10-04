@@ -1,3 +1,8 @@
+const {
+  getLeagueById,
+  getTeamById,
+} = require('../../../utils/redis');
+
 /**
  * @class
  * @name Leaderboard
@@ -12,49 +17,59 @@ class Leaderboard {
   }
 
   createNewLeaderboard({ leagueId, homeId, homeGoals, awayId, awayGoals}) {
-    const homeEntity = new this.Leaderboard({
-      leagueId: leagueId,
-      leagueName: 'Premier League',
-      teamId: homeId,
-      teamName: 'MU',
-      standing: 0,
-      round: 1,
-      scored: homeGoals,
-      achievedGoals: homeGoals - awayGoals,
-      concededGoals: awayGoals,
-      numberHomeWin: homeGoals > awayGoals ? 1 : 0,
-      numberHomeDraw: homeGoals === awayGoals,
-      numberHomeLose: homeGoals < awayGoals ? 1 : 0,
-      numberAwayWin: 0,
-      numberAwayDraw: 0,
-      numberAwayLose: 0,
-      points: homeGoals > awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
+    return Promise.all(
+      [
+        getLeagueById(leagueId),
+        getTeamById(homeId),
+        getTeamById(awayId)
+      ]
+    )
+    .then(([leagueData, homeData, awayData]) => {
+      const league = JSON.parse(leagueData);
+      const homeEntity = new this.Leaderboard({
+        leagueId: leagueId,
+        leagueName: league.name,
+        teamId: homeId,
+        teamName: JSON.parse(homeData).name,
+        standing: 0,
+        round: 1,
+        scored: homeGoals,
+        achievedGoals: homeGoals - awayGoals,
+        concededGoals: awayGoals,
+        numberHomeWin: homeGoals > awayGoals ? 1 : 0,
+        numberHomeDraw: homeGoals === awayGoals,
+        numberHomeLose: homeGoals < awayGoals ? 1 : 0,
+        numberAwayWin: 0,
+        numberAwayDraw: 0,
+        numberAwayLose: 0,
+        points: homeGoals > awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
+      });
+  
+      const awayEntity = new this.Leaderboard({
+        leagueId: leagueId,
+        leagueName: league.name,
+        teamId: awayId,
+        teamName: JSON.parse(awayData).name,
+        standing: 0,
+        round: 1,
+        scored: awayGoals,
+        achievedGoals: awayGoals - homeGoals,
+        concededGoals: homeGoals,
+        numberHomeWin: 0,
+        numberHomeDraw: 0,
+        numberHomeLose: 0,
+        numberAwayWin: homeGoals < awayGoals ? 1 : 0,
+        numberAwayDraw: homeGoals === awayGoals,
+        numberAwayLose: homeGoals > awayGoals ? 1 : 0,
+        points: homeGoals < awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
+      });
+  
+      return Promise.all([
+        homeEntity.save(),
+        awayEntity.save()
+      ])
+      .then(([home, away]) => home && away);
     });
-
-    const awayEntity = new this.Leaderboard({
-      leagueId: leagueId,
-      leagueName: 'Premier League',
-      teamId: awayId,
-      teamName: 'Liverpool',
-      standing: 0,
-      round: 1,
-      scored: awayGoals,
-      achievedGoals: awayGoals - homeGoals,
-      concededGoals: homeGoals,
-      numberHomeWin: 0,
-      numberHomeDraw: 0,
-      numberHomeLose: 0,
-      numberAwayWin: homeGoals < awayGoals ? 1 : 0,
-      numberAwayDraw: homeGoals === awayGoals,
-      numberAwayLose: homeGoals > awayGoals ? 1 : 0,
-      points: homeGoals < awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
-    });
-
-    return Promise.all([
-      homeEntity.save(),
-      awayEntity.save()
-    ])
-    .then(([home, away]) => home && away);
   }
 
   refreshStanding(leagueId) {
@@ -79,19 +94,20 @@ class Leaderboard {
     return new Promise((resolve, reject) => {
       this.Leaderboard.find({ leagueId, teamId })
       .then((items) => {
-        if (items !== 1) {
+        if (items.length !== 1) {
           reject();
         } else {
           const team = items[0];
           const update = { 
-            scored: team.score + score,
+            round: team.round + 1,
+            scored: team.scored + scored,
             achievedGoals: team.achievedGoals + (scored - conceded),
             concededGoals: team.concededGoals + conceded,
             numberHomeWin: team.numberHomeWin + (scored > conceded ? 1 : 0),
             numberHomeDraw: team.numberHomeDraw + (scored === conceded ? 1 : 0),
             numberHomeLose: team.numberHomeLose + (scored < conceded ? 1 : 0),
             points: team.points + (scored > conceded ? 3 : (scored === conceded ? 1 : 0))
-          }
+          };
           this.Leaderboard.update({ _id: team._id }, { $set: update }, { multi: true }, (err, numAffected) => {
             resolve(true);
           });
@@ -104,19 +120,19 @@ class Leaderboard {
     return new Promise((resolve, reject) => {
       this.Leaderboard.find({ leagueId, teamId })
       .then((items) => {
-        if (items !== 1) {
+        if (items.length !== 1) {
           reject();
         } else {
           const team = items[0];
           const update = { 
-            scored: team.score + score,
+            scored: team.scored + scored,
             achievedGoals: team.achievedGoals + (scored - conceded),
             concededGoals: team.concededGoals + conceded,
             numberAwayWin: team.numberAwayWin + (scored > conceded ? 1 : 0),
             numberAwayDraw: team.numberAwayDraw + (scored === conceded ? 1 : 0),
             numberAwayLose: team.numberAwayLose + (scored < conceded ? 1 : 0),
             points: team.points + (scored > conceded ? 3 : (scored === conceded ? 1 : 0))
-          }
+          };
           this.Leaderboard.update({ _id: team._id }, { $set: update }, { multi: true }, (err, numAffected) => {
             resolve(true);
           });
@@ -142,7 +158,6 @@ class Leaderboard {
       })
     )
     .then((results) => {
-      console.log('RESULTS COUNT =', results.length);
       for (let i = 0; i < results; i += 1) {
         if (results[i] === false) {
           console.log('Update Match FAILED !!!');
@@ -160,7 +175,6 @@ class Leaderboard {
    ** @param {Number} awayGoals
    */
   update({ leagueId, homeId, homeGoals, awayId, awayGoals }) {
-    console.log('UPDATE MATCH NOW');
     return this.Leaderboard.find({ 'leagueId': leagueId, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
       (err, items) => {
         if (err) {

@@ -13,6 +13,9 @@ const config = {
     path: '/docs'
   },
   resources: {
+    bbfootballConnector: {
+      host: process.env.BBFOOTBALL_HOST || 'http://bbfootball.net/service.php?nav='
+    },
     docker: {
       username: process.env.DOCKER_USERNAME || 'camapblue'
     },

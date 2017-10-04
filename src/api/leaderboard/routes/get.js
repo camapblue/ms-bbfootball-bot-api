@@ -1,8 +1,6 @@
 const Leaderboard = require('../models/leaderboard');
 const Joi = require('joi');
 
-// leagueId, homeId, homeGoals, awayId, awayGoals
-
 module.exports = {
   method: 'GET',
   path: '/leaderboard/{leagueId}',

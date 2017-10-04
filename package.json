@@ -19,6 +19,7 @@
     "node": "6.11.0"
   },
   "dependencies": {
+    "axios": "^0.16.2",
     "backpack-core": "^0.4.2",
     "bluebird": "^3.5.0",
     "boom": "^5.2.0",

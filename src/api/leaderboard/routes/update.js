@@ -1,8 +1,6 @@
 const Leaderboard = require('../models/leaderboard');
 const Joi = require('joi');
 
-// leagueId, homeId, homeGoals, awayId, awayGoals
-
 module.exports = {
   method: 'POST',
   path: '/leaderboard',
@@ -15,18 +13,18 @@ module.exports = {
       payload: Joi.object().keys({
         leagueId: Joi.number().required()
           .description('League id')
-          .example('123'),
+          .example('34'),
         matches: Joi.array().items(
           Joi.object({
             homeId: Joi.number().required()
             .description('Home team id')
-            .example('4325'),
+            .example('239'),
           homeGoals: Joi.number().required()
             .description('Total goals home team achieved')
             .example('2'),
           awayId: Joi.number().required()
             .description('Away team id')
-            .example('3325'),
+            .example('240'),
           awayGoals: Joi.number().required()
             .description('Total goals away team achieved')
             .example('3')

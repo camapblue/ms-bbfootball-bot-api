@@ -6,6 +6,8 @@ const swagger = require('./api/swagger');
 const chat = require('./api/chat');
 const link = require('./api/link');
 const leaderboard = require('./api/leaderboard');
+const league = require('./api/league');
+const team = require('./api/team');
 
 const server = new hapi.Server();
 
@@ -42,6 +44,20 @@ const plugins = [
   },
   {
     register: leaderboard,
+    select: ['api', 'docs', 'chat'],
+    options: {
+      config: Config.get('/')
+    }
+  },
+  {
+    register: league,
+    select: ['api', 'docs', 'chat'],
+    options: {
+      config: Config.get('/')
+    }
+  },
+  {
+    register: team,
     select: ['api', 'docs', 'chat'],
     options: {
       config: Config.get('/')

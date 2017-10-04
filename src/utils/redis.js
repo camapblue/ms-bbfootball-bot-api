@@ -53,10 +53,48 @@ const getBotFbId = (appFbId) => {
   });
 };
 
+// store league base on league id
+const setLeague = (leagueId, data) => {
+  return redis.hmset([
+    'BBFOOTBALL_LEAGUE',
+    leagueId, data
+  ]);
+};
+
+// get league data by league id
+const getLeagueById = (leagueId) => {
+  return new Promise((resolve) => {
+    redis.hget('BBFOOTBALL_LEAGUE', leagueId, (err, data) => {
+      resolve(data);
+    });
+  });
+};
+
+// store team base on team id
+const setTeam = (teamId, data) => {
+  return redis.hmset([
+    'BBFOOTBALL_TEAM',
+    teamId, data
+  ]);
+};
+
+// get team data by team id
+const getTeamById = (teamId) => {
+  return new Promise((resolve) => {
+    redis.hget('BBFOOTBALL_TEAM', teamId, (err, data) => {
+      resolve(data);
+    });
+  });
+};
+
 module.exports = {
   setAppFbId,
   checkCodeNumber,
   getAppFbId,
   setBotFbId,
-  getBotFbId
+  getBotFbId,
+  setLeague,
+  getLeagueById,
+  setTeam,
+  getTeamById
 };
