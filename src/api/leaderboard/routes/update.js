@@ -16,18 +16,23 @@ module.exports = {
         leagueId: Joi.number().required()
           .description('League id')
           .example('123'),
-        homeId: Joi.number().required()
-          .description('Home team id')
-          .example('4325'),
-        homeGoals: Joi.number().required()
-          .description('Total goals home team achieved')
-          .example('2'),
-        awayId: Joi.number().required()
-          .description('Away team id')
-          .example('3325'),
-        awayGoals: Joi.number().required()
-          .description('Total goals away team achieved')
-          .example('3')
+        matches: Joi.array().items(
+          Joi.object({
+            homeId: Joi.number().required()
+            .description('Home team id')
+            .example('4325'),
+          homeGoals: Joi.number().required()
+            .description('Total goals home team achieved')
+            .example('2'),
+          awayId: Joi.number().required()
+            .description('Away team id')
+            .example('3325'),
+          awayGoals: Joi.number().required()
+            .description('Total goals away team achieved')
+            .example('3')
+          })
+        ).min(1)
+        .required()
       }).label('Update leaderboard payload')
     },
     plugins: {
@@ -43,9 +48,9 @@ module.exports = {
       const { server: { logger, dbCon } } = req;
 
       const leaderboard = new Leaderboard({ logger, dbCon });
-      const { leagueId, homeId, homeGoals, awayId, awayGoals } = req.payload;
+      const { leagueId, matches } = req.payload;
 
-      return leaderboard.update({ leagueId, homeId, homeGoals, awayId, awayGoals })
+      return leaderboard.updateMatches(leagueId, matches)
         .then(res => reply(res));
     }
   }

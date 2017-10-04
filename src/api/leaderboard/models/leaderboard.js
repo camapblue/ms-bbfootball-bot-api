@@ -17,9 +17,10 @@ class Leaderboard {
       leagueName: 'Premier League',
       teamId: homeId,
       teamName: 'MU',
-      standing: 1,  // ???
+      standing: 0,
       round: 1,
-      achievedGoals: homeGoals,
+      scored: homeGoals,
+      achievedGoals: homeGoals - awayGoals,
       concededGoals: awayGoals,
       numberHomeWin: homeGoals > awayGoals ? 1 : 0,
       numberHomeDraw: homeGoals === awayGoals,
@@ -30,20 +31,15 @@ class Leaderboard {
       points: homeGoals > awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
     });
 
-    homeEntity.save((err) => {
-      if (err) {
-        this.logger.error('Something wrong when creating leaderboard entity', err);
-      }
-    });
-
     const awayEntity = new this.Leaderboard({
       leagueId: leagueId,
       leagueName: 'Premier League',
       teamId: awayId,
       teamName: 'Liverpool',
-      standing: 1,  // ???
+      standing: 0,
       round: 1,
-      achievedGoals: awayGoals,
+      scored: awayGoals,
+      achievedGoals: awayGoals - homeGoals,
       concededGoals: homeGoals,
       numberHomeWin: 0,
       numberHomeDraw: 0,
@@ -54,10 +50,105 @@ class Leaderboard {
       points: homeGoals < awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
     });
 
-    awayEntity.save((err) => {
-      if (err) {
-        this.logger.error('Something wrong when creating leaderboard entity', err);
+    return Promise.all([
+      homeEntity.save(),
+      awayEntity.save()
+    ])
+    .then(([home, away]) => home && away);
+  }
+
+  refreshStanding(leagueId) {
+    let index = 0;
+    return new Promise((resolve, reject) => {
+      this.Leaderboard.find({ leagueId })
+      .sort({ points: -1, achievedGoals: -1, scored: -1 })
+      .cursor()
+      .on('data', (item) => {
+        index += 1;
+        return this.Leaderboard.update({ _id: item._id }, { $set: { standing: index } }, { multi: false }, (err, numAffected) => {
+          console.log('NUMBER AFFECTED =', numAffected);
+        });
+      })
+      .on('error', reject)
+      .on('end', resolve)
+    })
+    .then(() => true);
+  }
+
+  updateHomeTeam(leagueId, teamId, scored, conceded) {
+    return new Promise((resolve, reject) => {
+      this.Leaderboard.find({ leagueId, teamId })
+      .then((items) => {
+        if (items !== 1) {
+          reject();
+        } else {
+          const team = items[0];
+          const update = { 
+            scored: team.score + score,
+            achievedGoals: team.achievedGoals + (scored - conceded),
+            concededGoals: team.concededGoals + conceded,
+            numberHomeWin: team.numberHomeWin + (scored > conceded ? 1 : 0),
+            numberHomeDraw: team.numberHomeDraw + (scored === conceded ? 1 : 0),
+            numberHomeLose: team.numberHomeLose + (scored < conceded ? 1 : 0),
+            points: team.points + (scored > conceded ? 3 : (scored === conceded ? 1 : 0))
+          }
+          this.Leaderboard.update({ _id: team._id }, { $set: update }, { multi: true }, (err, numAffected) => {
+            resolve(true);
+          });
+        }
+      })
+    });
+  }
+
+  updateAwayTeam(leagueId, teamId, scored, conceded) {
+    return new Promise((resolve, reject) => {
+      this.Leaderboard.find({ leagueId, teamId })
+      .then((items) => {
+        if (items !== 1) {
+          reject();
+        } else {
+          const team = items[0];
+          const update = { 
+            scored: team.score + score,
+            achievedGoals: team.achievedGoals + (scored - conceded),
+            concededGoals: team.concededGoals + conceded,
+            numberAwayWin: team.numberAwayWin + (scored > conceded ? 1 : 0),
+            numberAwayDraw: team.numberAwayDraw + (scored === conceded ? 1 : 0),
+            numberAwayLose: team.numberAwayLose + (scored < conceded ? 1 : 0),
+            points: team.points + (scored > conceded ? 3 : (scored === conceded ? 1 : 0))
+          }
+          this.Leaderboard.update({ _id: team._id }, { $set: update }, { multi: true }, (err, numAffected) => {
+            resolve(true);
+          });
+        }
+      })
+    });
+  }
+
+  /**
+   ** @param {Number} leagueId
+   ** @param {Array} matches
+   */
+  updateMatches(leagueId, matches) {
+    return Promise.all(
+      matches.map((match) => {
+        const {
+          homeId,
+          homeGoals,
+          awayId,
+          awayGoals
+        } = match;
+        return this.update({ leagueId, homeId, homeGoals, awayId, awayGoals });
+      })
+    )
+    .then((results) => {
+      console.log('RESULTS COUNT =', results.length);
+      for (let i = 0; i < results; i += 1) {
+        if (results[i] === false) {
+          console.log('Update Match FAILED !!!');
+        }
       }
+      return this.refreshStanding(leagueId);
     });
   }
 
@@ -69,21 +160,23 @@ class Leaderboard {
    ** @param {Number} awayGoals
    */
   update({ leagueId, homeId, homeGoals, awayId, awayGoals }) {
+    console.log('UPDATE MATCH NOW');
     return this.Leaderboard.find({ 'leagueId': leagueId, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
       (err, items) => {
         if (err) {
           this.logger.error('Something wrong when finding item!', err);
-          return Promise.resolve('ERROR NOW');  // add new item
+          return Promise.resolve('ERROR NOW');
         }
         return items;
       })
     .then((items) => {
-      console.log('ITEMS =', items.length);
       if (items.length === 0) {
-        this.createNewLeaderboard({ leagueId, homeId, homeGoals, awayId, awayGoals });
-        return Promise.resolve('success');
+        return this.createNewLeaderboard({ leagueId, homeId, homeGoals, awayId, awayGoals });
       }
-      return Promise.resolve('Should UPDATE');
+      return Promise.all([
+        this.updateHomeTeam(leagueId, homeId, homeGoals, awayGoals),
+        this.updateAwayTeam(leagueId, awayId, awayGoals, homeGoals)
+      ]).then(([home, away]) => home && away);
     });
   }
 
@@ -91,7 +184,32 @@ class Leaderboard {
    ** @param {Number} leagueId
    */
   get(leagueId) {
-    return Promise.resolve('GET LEAGUE');
+    return this.Leaderboard.find({ 'leagueId': leagueId },
+      (err, items) => {
+        if (err) {
+          this.logger.error('Something wrong when finding item!', err);
+          return Promise.resolve('ERROR NOW');
+        }
+        return items;
+      })
+    .sort({ 'standing': 1 })
+    .then((items) => {
+      let result = [];
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        result.push(
+          {
+            standing: item.standing,
+            teamName: item.teamName,
+            goals: item.achievedGoals - item.concededGoals,
+            points: item.points,
+            round: item.round,
+            standing: item.standing
+          }
+        )
+      }
+      return Promise.resolve({ leaderboard: result });
+    });
   }
 }
 

@@ -9,16 +9,13 @@ class LeaderboardSchema {
 
     const Schema = db.Schema;
     return new Schema({
-      leaderboardId: {
-        type: Schema.Types.ObjectId,
-        default() { return new db.Types.ObjectId(); }
-      },
       leagueId: String,
       leagueName: String,
       teamId: String,
       teamName: String,
       standing: Number,
       round: Number,
+      scored: Number,
       achievedGoals: Number,
       concededGoals: Number,
       numberHomeWin: Number,
