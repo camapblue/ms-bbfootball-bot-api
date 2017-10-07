@@ -1,21 +1,26 @@
 version: '2'
 services:
-  microservice-jenius-bot:
+  bbbot-api:
     build:
       context: .
       args:
-        - SERVICE_NAME=microservice-jenius-bot
+        - SERVICE_NAME=bbbot-api
         - NPM_REGISTRY
         - NPM_TOKEN
         - HTTP_PROXY
         - HTTPS_PROXY
     environment:
       - SERVICE_PORT=3000
-      - WAIT_START=1
+      - WAIT_START=3
     ports:
       - 3000:3000
     depends_on:
       - redis-store
+      - mongodb
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
   redis-store:
     image: redis
     ports:

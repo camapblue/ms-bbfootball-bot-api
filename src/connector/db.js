@@ -13,8 +13,9 @@ class DBConnector {
 
   constructor(opts) {
     const {
-      hostname, port, database, username, password
+      hostname, port, database, username, password, db_uri
     } = opts;
+    console.log('DB URI =', db_uri);
 
     mongoose.set('debug', opts.debug);
     this.db = mongoose;
@@ -23,11 +24,16 @@ class DBConnector {
     this.hostname = hostname;
     this.port = port;
     this.database = database;
+    this.dbURI = db_uri;
     return this;
   }
 
   connect() {
-    const connectionURI = `mongodb://${this.hostname}:${this.port}/${this.database}`;
+    let connectionURI = this.dbURI;
+    if (connectionURI === undefined) {
+      console.log('CONNECTION DB =', this.hostname, ' PORT =', this.port, ' DATABASE =', this.database);
+      connectionURI = `mongodb://${this.hostname}:${this.port}/${this.database}`;
+    };
     const options = {
       user: this.user,
       pass: this.pass,

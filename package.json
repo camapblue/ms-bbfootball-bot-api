@@ -1,5 +1,5 @@
 {
-  "name": "microservice-bbfootball-bot",
+  "name": "bbbot-api",
   "version": "1.0.0",
   "description": "Microservice BBFootball Bot",
   "scripts": {

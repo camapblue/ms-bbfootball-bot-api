@@ -11,6 +11,7 @@ internals.applyRoutes = (server, next) => {
 
 exports.register = (server, opts, next) => {
   const { config } = opts;
+  // mongodb://heroku_dfmcskv4:3a8o3aufdivbakm6p8uv6h84hl@ds111535.mlab.com:11535/heroku_dfmcskv4
   const dbCon = new DBConnector(config.resources.db);
   dbCon.createSchemas();
 
@@ -35,7 +36,7 @@ exports.register = (server, opts, next) => {
       console.log('Start DB Connection SUCCESSFUL');
     })
     .catch((err) => {
-      throw err;
+      console.log('Couldn\'t connect to MongoDB. Error: ', err);
     });
   });
 

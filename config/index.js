@@ -21,7 +21,8 @@ const config = {
     },
     redis: {
       hostname: process.env.REDIS_HOSTNAME || 'localhost',
-      port: process.env.REDIS_PORT || 6379
+      port: process.env.REDIS_PORT || 6379,
+      redis_url: process.env.REDIS_URL
     },
     db: {
       hostname: process.env.DB_HOSTNAME || '127.0.0.1',
@@ -29,8 +30,9 @@ const config = {
       database: process.env.DB_NAME || 'bbfootball_leaderboard',
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      debug: process.env.DB_DEBUG || false
-    },
+      debug: process.env.DB_DEBUG || false,
+      db_uri: process.env.MONGODB_URI
+    }
   }
 };
 
