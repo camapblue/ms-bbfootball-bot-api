@@ -1,10 +1,10 @@
 version: '2'
 services:
-  bbbot-api:
+  ms-bbfootball-bot-api:
     build:
       context: .
       args:
-        - SERVICE_NAME=bbbot-api
+        - SERVICE_NAME=ms-bbfootball-bot-api
         - NPM_REGISTRY
         - NPM_TOKEN
         - HTTP_PROXY

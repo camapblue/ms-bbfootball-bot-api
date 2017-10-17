@@ -143,6 +143,18 @@ class Leaderboard {
 
   /**
    ** @param {Number} leagueId
+   */
+  reset(leagueId) {
+    return new Promise((resolve, reject) => {
+      this.Leaderboard.remove({ leagueId }, (err, numAffected) => {
+        console.log('Reset NUMBER AFFECTED: ', numAffected);
+        resolve(true);
+      });
+    });
+  }
+
+  /**
+   ** @param {Number} leagueId
    ** @param {Array} matches
    */
   updateMatches(leagueId, matches) {
