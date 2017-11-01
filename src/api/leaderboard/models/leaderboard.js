@@ -17,10 +17,11 @@ class Leaderboard {
     this.Leaderboard = this.dbCon.db.model('leaderboard', this.dbCon.dbSchema.leaderboard);
   }
 
-  initNewHomeEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
+  initNewHomeEntity({ leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
     return new this.Leaderboard({
       leagueId: leagueId,
       leagueName: leagueName,
+      season: season,
       teamId: homeId,
       teamName: homeName,
       standing: 0,
@@ -38,10 +39,11 @@ class Leaderboard {
     });
   }
 
-  initNewAwayEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
+  initNewAwayEntity({ leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
     return new this.Leaderboard({
       leagueId: leagueId,
       leagueName: leagueName,
+      season: season,
       teamId: awayId,
       teamName: awayName,
       standing: 0,
@@ -59,11 +61,12 @@ class Leaderboard {
     });
   }
 
-  initNewMatchOfHomeEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
+  initNewMatchOfHomeEntity({ leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
     const MatchOfHome = this.dbCon.db.model(`Team_${homeId}`, this.dbCon.dbSchema.match);
     return new MatchOfHome({
       leagueId: leagueId,
       leagueName: leagueName,
+      season: season,
       homeId: homeId,
       homeName: homeName,
       homeGoals: homeGoals,
@@ -75,11 +78,12 @@ class Leaderboard {
     });
   }
 
-  initNewMatchOfAwayEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
+  initNewMatchOfAwayEntity({ leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
     const MatchOfAway = this.dbCon.db.model(`Team_${awayId}`, this.dbCon.dbSchema.match);
     return new MatchOfAway({
       leagueId: leagueId,
       leagueName: leagueName,
+      season: season,
       homeId: homeId,
       homeName: homeName,
       homeGoals: homeGoals,
@@ -124,9 +128,9 @@ class Leaderboard {
     .then(() => true);
   }
 
-  updateHomeTeam(leagueId, teamId, scored, conceded) {
+  updateHomeTeam(leagueId, season, teamId, scored, conceded) {
     return new Promise((resolve, reject) => {
-      this.Leaderboard.find({ leagueId, teamId })
+      this.Leaderboard.find({ leagueId, season, teamId })
       .then((items) => {
         if (items.length !== 1) {
           reject();
@@ -150,9 +154,9 @@ class Leaderboard {
     });
   }
 
-  updateAwayTeam(leagueId, teamId, scored, conceded) {
+  updateAwayTeam(leagueId, season, teamId, scored, conceded) {
     return new Promise((resolve, reject) => {
-      this.Leaderboard.find({ leagueId, teamId })
+      this.Leaderboard.find({ leagueId, season, teamId })
       .then((items) => {
         if (items.length !== 1) {
           reject();
@@ -187,29 +191,64 @@ class Leaderboard {
     }).then(found => found.length > 0);
   }
 
+  removeLeagueInSeason(leagueId, season) {
+    return this.Leaderboard.remove({ leagueId, season }, (err, numAffected) => {
+      return numAffected;
+    }).then(numAffected => numAffected.result.ok > 0);
+  }
+
+  removeMatchOfTeamInSeason(teamId, leagueId, season) {
+    const MatchOfTeam = this.dbCon.db.model(`Team_${teamId}`, this.dbCon.dbSchema.match);
+    return MatchOfTeam.remove({ leagueId, season }, (err, numAffected) => {
+      return numAffected;
+    }).then(numAffected => numAffected.result.ok);
+  }
+
   /**
    ** @param {Number} leagueId
+   ** @param {String} season
    */
-  reset(leagueId) {
-    return new Promise((resolve, reject) => {
-      // find all team_id & season and remove all match data of leaderboard
-      
-      this.Leaderboard.remove({ leagueId }, (err, numAffected) => {
-        console.log('Reset NUMBER AFFECTED: ', numAffected);
-        resolve(true);
-      });
+  reset(leagueId, season) {
+    return this.Leaderboard.find({ leagueId, season },
+    (err, items) => {
+      if (err) {
+        this.logger.error('Something wrong when finding item!', err);
+        return Promise.resolve('ERROR NOW');
+      }
+      return items;
+    })
+    .then(teams => {
+      return Promise.all(
+        teams.map((team) => {
+          return this.removeMatchOfTeamInSeason(team.teamId, leagueId, season)  ;
+        })
+      ).then((results) => {
+        let shouldRemove = false;
+        for (let i = 0 ; i < results.length ; i++) {
+          if (results[i]) {
+            shouldRemove = true;
+            break;
+          }
+        }
+        if (shouldRemove) {
+          return this.removeLeagueInSeason(leagueId, season);
+        }
+        return false;
+      })
     });
   }
 
   /**
    ** @param {Number} leagueId
+   ** @param {String} season
    ** @param {Array} matches
    */
-  updateMatches(leagueId, matches) {
+  updateMatches(leagueId, season, matches) {
     return Promise.all(
       matches.map((match) => {
         return this.update({
           leagueId,
+          season,
           ...match
         });
       })
@@ -226,13 +265,14 @@ class Leaderboard {
 
   /**
    ** @param {Number} leagueId
+   ** @param {String} season
    ** @param {Number} homeId
    ** @param {Number} homeGoals
    ** @param {Number} awayId
    ** @param {Number} awayGoals
    ** @param {Number} startTime
    */
-  update({ leagueId, homeId, homeGoals, awayId, awayGoals, startTime }) {
+  update({ leagueId, season, homeId, homeGoals, awayId, awayGoals, startTime }) {
     return Promise.all(
       [
         getLeagueById(leagueId),
@@ -248,7 +288,7 @@ class Leaderboard {
       const homeName = JSON.parse(homeData).name;
       const awayName = JSON.parse(awayData).name;
 
-      return this.Leaderboard.find({ 'leagueId': leagueId, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
+      return this.Leaderboard.find({ leagueId, season, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
         (err, items) => {
           if (err) {
             this.logger.error('Something wrong when finding item!', err);
@@ -257,7 +297,7 @@ class Leaderboard {
           return items;
         })
       .then((items) => {
-        const match = { leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime };
+        const match = { leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime };
         if (items.length === 0) {
           return this.createNewLeaderboard(match);
         }
@@ -265,8 +305,8 @@ class Leaderboard {
         const matchOfAwayEntity = this.initNewMatchOfAwayEntity(match);
 
         return Promise.all([
-          this.updateHomeTeam(leagueId, homeId, homeGoals, awayGoals),
-          this.updateAwayTeam(leagueId, awayId, awayGoals, homeGoals),
+          this.updateHomeTeam(leagueId, season, homeId, homeGoals, awayGoals),
+          this.updateAwayTeam(leagueId, season, awayId, awayGoals, homeGoals),
           matchOfHomeEntity.save(),
           matchOfAwayEntity.save()
         ]).then(([home, away, matchHome, matchAway]) => home && away && matchHome && matchAway);
@@ -276,9 +316,10 @@ class Leaderboard {
 
   /**
    ** @param {Number} leagueId
+   ** @param {String} season
    */
-  get(leagueId) {
-    return this.Leaderboard.find({ 'leagueId': leagueId },
+  get(leagueId, season) {
+    return this.Leaderboard.find({ leagueId, season },
       (err, items) => {
         if (err) {
           this.logger.error('Something wrong when finding item!', err);

@@ -11,6 +11,7 @@ class LeaderboardSchema {
     return new Schema({
       leagueId: String,
       leagueName: String,
+      season: String,
       teamId: String,
       teamName: String,
       standing: Number,

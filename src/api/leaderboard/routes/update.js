@@ -14,6 +14,9 @@ module.exports = {
         leagueId: Joi.number().required()
           .description('League id')
           .example('34'),
+        season: Joi.string().required()
+          .description('Season of a league')
+          .example('2017-2018'),
         matches: Joi.array().items(
           Joi.object({
             homeId: Joi.number().required()
@@ -49,9 +52,9 @@ module.exports = {
       const { server: { logger, dbCon } } = req;
 
       const leaderboard = new Leaderboard({ logger, dbCon });
-      const { leagueId, matches } = req.payload;
+      const { leagueId, season, matches } = req.payload;
 
-      return leaderboard.updateMatches(leagueId, matches)
+      return leaderboard.updateMatches(leagueId, season, matches)
         .then(res => reply(res));
     }
   }

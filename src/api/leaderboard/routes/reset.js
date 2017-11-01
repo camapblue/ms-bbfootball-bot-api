@@ -3,7 +3,7 @@ const Joi = require('joi');
 
 module.exports = {
   method: 'DELETE',
-  path: '/leaderboard/{leagueId}',
+  path: '/leaderboard/{leagueId}/{season}',
   config: {
     tags: ['api'],
     description: 'This api for reset all data of a league',
@@ -11,9 +11,12 @@ module.exports = {
     validate: {
       options: { allowUnknown: true },
       params: {
-        leagueId: Joi.string().required()
-        .description('League Id')
-        .example('14')
+        leagueId: Joi.number().required()
+          .description('League Id')
+          .example('14'),
+        season: Joi.string().required()
+          .description('Season of the league')
+          .example('2017-2018')
       }
     },
     plugins: {
@@ -29,9 +32,9 @@ module.exports = {
       const { server: { logger, dbCon } } = req;
 
       const leaderboard = new Leaderboard({ logger, dbCon });
-      const { leagueId } = req.params;
+      const { leagueId, season } = req.params;
 
-      return leaderboard.reset(leagueId)
+      return leaderboard.reset(leagueId, season)
         .then(res => reply(res));
     }
   }

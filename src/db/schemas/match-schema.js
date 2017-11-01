@@ -9,6 +9,7 @@ class MatchSchema {
       return new Schema({
         leagueId: String,
         leagueName: String,
+        season: String,
         homeId: String,
         homeName: String,
         awayId: String,
