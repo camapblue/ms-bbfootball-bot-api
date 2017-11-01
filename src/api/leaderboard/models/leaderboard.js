@@ -2,6 +2,7 @@ const {
   getLeagueById,
   getTeamById,
 } = require('../../../utils/redis');
+const { getMatchResult } = require('../../../utils/match-result');
 
 /**
  * @class
@@ -16,60 +17,93 @@ class Leaderboard {
     this.Leaderboard = this.dbCon.db.model('leaderboard', this.dbCon.dbSchema.leaderboard);
   }
 
-  createNewLeaderboard({ leagueId, homeId, homeGoals, awayId, awayGoals}) {
-    return Promise.all(
-      [
-        getLeagueById(leagueId),
-        getTeamById(homeId),
-        getTeamById(awayId)
-      ]
-    )
-    .then(([leagueData, homeData, awayData]) => {
-      const league = JSON.parse(leagueData);
-      const homeEntity = new this.Leaderboard({
-        leagueId: leagueId,
-        leagueName: league.name,
-        teamId: homeId,
-        teamName: JSON.parse(homeData).name,
-        standing: 0,
-        round: 1,
-        scored: homeGoals,
-        achievedGoals: homeGoals - awayGoals,
-        concededGoals: awayGoals,
-        numberHomeWin: homeGoals > awayGoals ? 1 : 0,
-        numberHomeDraw: homeGoals === awayGoals,
-        numberHomeLose: homeGoals < awayGoals ? 1 : 0,
-        numberAwayWin: 0,
-        numberAwayDraw: 0,
-        numberAwayLose: 0,
-        points: homeGoals > awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
-      });
-  
-      const awayEntity = new this.Leaderboard({
-        leagueId: leagueId,
-        leagueName: league.name,
-        teamId: awayId,
-        teamName: JSON.parse(awayData).name,
-        standing: 0,
-        round: 1,
-        scored: awayGoals,
-        achievedGoals: awayGoals - homeGoals,
-        concededGoals: homeGoals,
-        numberHomeWin: 0,
-        numberHomeDraw: 0,
-        numberHomeLose: 0,
-        numberAwayWin: homeGoals < awayGoals ? 1 : 0,
-        numberAwayDraw: homeGoals === awayGoals,
-        numberAwayLose: homeGoals > awayGoals ? 1 : 0,
-        points: homeGoals < awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
-      });
-  
-      return Promise.all([
-        homeEntity.save(),
-        awayEntity.save()
-      ])
-      .then(([home, away]) => home && away);
+  initNewHomeEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
+    return new this.Leaderboard({
+      leagueId: leagueId,
+      leagueName: leagueName,
+      teamId: homeId,
+      teamName: homeName,
+      standing: 0,
+      round: 1,
+      scored: homeGoals,
+      achievedGoals: homeGoals - awayGoals,
+      concededGoals: awayGoals,
+      numberHomeWin: homeGoals > awayGoals ? 1 : 0,
+      numberHomeDraw: homeGoals === awayGoals,
+      numberHomeLose: homeGoals < awayGoals ? 1 : 0,
+      numberAwayWin: 0,
+      numberAwayDraw: 0,
+      numberAwayLose: 0,
+      points: homeGoals > awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
     });
+  }
+
+  initNewAwayEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals }) {
+    return new this.Leaderboard({
+      leagueId: leagueId,
+      leagueName: leagueName,
+      teamId: awayId,
+      teamName: awayName,
+      standing: 0,
+      round: 1,
+      scored: awayGoals,
+      achievedGoals: awayGoals - homeGoals,
+      concededGoals: homeGoals,
+      numberHomeWin: 0,
+      numberHomeDraw: 0,
+      numberHomeLose: 0,
+      numberAwayWin: homeGoals < awayGoals ? 1 : 0,
+      numberAwayDraw: homeGoals === awayGoals,
+      numberAwayLose: homeGoals > awayGoals ? 1 : 0,
+      points: homeGoals < awayGoals ? 3 : (homeGoals === awayGoals ? 1 : 0)
+    });
+  }
+
+  initNewMatchOfHomeEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
+    const MatchOfHome = this.dbCon.db.model(`Team_${homeId}`, this.dbCon.dbSchema.match);
+    return new MatchOfHome({
+      leagueId: leagueId,
+      leagueName: leagueName,
+      homeId: homeId,
+      homeName: homeName,
+      homeGoals: homeGoals,
+      awayId: awayId,
+      awayName: awayName,
+      awayGoals: awayGoals,
+      startTime: startTime,
+      result: getMatchResult(homeGoals, awayGoals)
+    });
+  }
+
+  initNewMatchOfAwayEntity({ leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime }) {
+    const MatchOfAway = this.dbCon.db.model(`Team_${awayId}`, this.dbCon.dbSchema.match);
+    return new MatchOfAway({
+      leagueId: leagueId,
+      leagueName: leagueName,
+      homeId: homeId,
+      homeName: homeName,
+      homeGoals: homeGoals,
+      awayId: awayId,
+      awayName: awayName,
+      awayGoals: awayGoals,
+      startTime: startTime,
+      result: getMatchResult(awayGoals, homeGoals)
+    });
+  }
+
+  createNewLeaderboard(match) {
+    const homeEntity = this.initNewHomeEntity(match);
+    const awayEntity = this.initNewAwayEntity(match);
+    const matchOfHomeEntity = this.initNewMatchOfHomeEntity(match);
+    const matchOfAwayEntity = this.initNewMatchOfAwayEntity(match);
+
+    return Promise.all([
+      homeEntity.save(),
+      awayEntity.save(),
+      matchOfHomeEntity.save(),
+      matchOfAwayEntity.save()
+    ])
+    .then(([home, away, matchHome, matchAway]) => home && away && matchHome && matchAway);
   }
 
   refreshStanding(leagueId) {
@@ -141,11 +175,25 @@ class Leaderboard {
     });
   }
 
+  checkMatchExisted(homeId, awayId, startTime) {
+    const MatchOfHome = this.dbCon.db.model(`Team_${homeId}`, this.dbCon.dbSchema.match);
+    return MatchOfHome.find({ 'homeId': homeId, 'awayId': awayId, 'startTime': startTime },
+    (err, items) => {
+      if (err) {
+        this.logger.error('Something wrong when finding item!', err);
+        return Promise.resolve('ERROR NOW');
+      }
+      return items;
+    }).then(found => found.length > 0);
+  }
+
   /**
    ** @param {Number} leagueId
    */
   reset(leagueId) {
     return new Promise((resolve, reject) => {
+      // find all team_id & season and remove all match data of leaderboard
+      
       this.Leaderboard.remove({ leagueId }, (err, numAffected) => {
         console.log('Reset NUMBER AFFECTED: ', numAffected);
         resolve(true);
@@ -160,13 +208,10 @@ class Leaderboard {
   updateMatches(leagueId, matches) {
     return Promise.all(
       matches.map((match) => {
-        const {
-          homeId,
-          homeGoals,
-          awayId,
-          awayGoals
-        } = match;
-        return this.update({ leagueId, homeId, homeGoals, awayId, awayGoals });
+        return this.update({
+          leagueId,
+          ...match
+        });
       })
     )
     .then((results) => {
@@ -185,24 +230,47 @@ class Leaderboard {
    ** @param {Number} homeGoals
    ** @param {Number} awayId
    ** @param {Number} awayGoals
+   ** @param {Number} startTime
    */
-  update({ leagueId, homeId, homeGoals, awayId, awayGoals }) {
-    return this.Leaderboard.find({ 'leagueId': leagueId, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
-      (err, items) => {
-        if (err) {
-          this.logger.error('Something wrong when finding item!', err);
-          return Promise.resolve('ERROR NOW');
+  update({ leagueId, homeId, homeGoals, awayId, awayGoals, startTime }) {
+    return Promise.all(
+      [
+        getLeagueById(leagueId),
+        getTeamById(homeId),
+        getTeamById(awayId),
+        this.checkMatchExisted(homeId, awayId, startTime)
+      ]
+    )
+    .then(([leagueData, homeData, awayData, existed]) => {
+      if (existed) return false;
+
+      const leagueName = JSON.parse(leagueData).name;
+      const homeName = JSON.parse(homeData).name;
+      const awayName = JSON.parse(awayData).name;
+
+      return this.Leaderboard.find({ 'leagueId': leagueId, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
+        (err, items) => {
+          if (err) {
+            this.logger.error('Something wrong when finding item!', err);
+            return Promise.resolve('ERROR NOW');
+          }
+          return items;
+        })
+      .then((items) => {
+        const match = { leagueId, leagueName, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime };
+        if (items.length === 0) {
+          return this.createNewLeaderboard(match);
         }
-        return items;
-      })
-    .then((items) => {
-      if (items.length === 0) {
-        return this.createNewLeaderboard({ leagueId, homeId, homeGoals, awayId, awayGoals });
-      }
-      return Promise.all([
-        this.updateHomeTeam(leagueId, homeId, homeGoals, awayGoals),
-        this.updateAwayTeam(leagueId, awayId, awayGoals, homeGoals)
-      ]).then(([home, away]) => home && away);
+        const matchOfHomeEntity = this.initNewMatchOfHomeEntity(match);
+        const matchOfAwayEntity = this.initNewMatchOfAwayEntity(match);
+
+        return Promise.all([
+          this.updateHomeTeam(leagueId, homeId, homeGoals, awayGoals),
+          this.updateAwayTeam(leagueId, awayId, awayGoals, homeGoals),
+          matchOfHomeEntity.save(),
+          matchOfAwayEntity.save()
+        ]).then(([home, away, matchHome, matchAway]) => home && away && matchHome && matchAway);
+      });
     });
   }
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const LeaderboardSchema = require('../db/schemas/leaderboard-schema');
+const MatchSchema = require('../db/schemas/match-schema');
 
 const promiseLibrary = global.Promise;
 mongoose.Promise = promiseLibrary;
@@ -57,6 +58,7 @@ class DBConnector {
   createSchemas() {
     this.dbSchema = {};
     this.dbSchema.leaderboard = new LeaderboardSchema(mongoose);
+    this.dbSchema.match = new MatchSchema(mongoose);
   }
 }
 
