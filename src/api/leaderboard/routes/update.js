@@ -17,17 +17,20 @@ module.exports = {
         matches: Joi.array().items(
           Joi.object({
             homeId: Joi.number().required()
-            .description('Home team id')
-            .example('239'),
-          homeGoals: Joi.number().required()
-            .description('Total goals home team achieved')
-            .example('2'),
-          awayId: Joi.number().required()
-            .description('Away team id')
-            .example('240'),
-          awayGoals: Joi.number().required()
-            .description('Total goals away team achieved')
-            .example('3')
+              .description('Home team id')
+              .example('239'),
+            homeGoals: Joi.number().required()
+              .description('Total goals home team achieved')
+              .example('2'),
+            awayId: Joi.number().required()
+              .description('Away team id')
+              .example('240'),
+            awayGoals: Joi.number().required()
+              .description('Total goals away team achieved')
+              .example('3'),
+            startTime: Joi.number().required()
+              .description('Timestamp of start time of the match')
+              .example('1509524904')
           })
         ).min(1)
         .required()

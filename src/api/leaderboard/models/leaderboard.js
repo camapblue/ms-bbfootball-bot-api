@@ -227,7 +227,7 @@ class Leaderboard {
           {
             standing: item.standing,
             teamName: item.teamName,
-            goals: item.achievedGoals - item.concededGoals,
+            goals: item.achievedGoals,
             points: item.points,
             round: item.round,
             standing: item.standing
