@@ -61,6 +61,15 @@ const setLeague = (leagueId, data) => {
   ]);
 };
 
+// get all available league
+const getLeagues = () => {
+  return new Promise((resolve) => {
+    redis.hgetall('BBFOOTBALL_LEAGUE', (err, leagues) => {
+      resolve(leagues);
+    });
+  });
+}
+
 // get league data by league id
 const getLeagueById = (leagueId) => {
   return new Promise((resolve) => {
@@ -95,6 +104,7 @@ module.exports = {
   getBotFbId,
   setLeague,
   getLeagueById,
+  getLeagues,
   setTeam,
   getTeamById
 };

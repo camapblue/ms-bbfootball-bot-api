@@ -1,7 +1,8 @@
 const axios = require('axios');
 const {
   setLeague,
-  getLeagueById
+  getLeagueById,
+  getLeagues
 } = require('../../../utils/redis');
 
 /**
@@ -41,6 +42,20 @@ class League {
         }
         return true;
       })
+    });
+  }
+
+  get() {
+    return getLeagues()
+    .then(leagues => {
+      let result = [];
+      Object.keys(leagues).forEach(leagueId => {
+        result.push({
+          leagueId,
+          ...JSON.parse(leagues[leagueId])
+        })
+      });
+      return result;
     });
   }
 }

@@ -260,7 +260,8 @@ class Leaderboard {
         }
       }
       return this.refreshStanding(leagueId);
-    });
+    })
+    .then((result) => this.get(leagueId, season));
   }
 
   /**
@@ -335,6 +336,7 @@ class Leaderboard {
         result.push(
           {
             standing: item.standing,
+            teamId: item.teamId,
             teamName: item.teamName,
             goals: item.achievedGoals,
             points: item.points,
