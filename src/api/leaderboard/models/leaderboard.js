@@ -3,6 +3,7 @@ const {
   getTeamById,
 } = require('../../../utils/redis');
 const { getMatchResult } = require('../../../utils/match-result');
+const { groupBy } = require('../../../utils/array');
 
 /**
  * @class
@@ -204,6 +205,15 @@ class Leaderboard {
     }).then(numAffected => numAffected.result.ok);
   }
 
+  groupByRound(matches) {
+    const groupByMatches = groupBy(matches, 'round');
+    let groups = [];
+    Object.keys(groupByMatches).forEach(function(key) {
+      groups.push(groupByMatches[key])
+    });
+    return groups;
+  }  
+
   /**
    ** @param {Number} leagueId
    ** @param {String} season
@@ -244,6 +254,17 @@ class Leaderboard {
    ** @param {Array} matches
    */
   updateMatches(leagueId, season, matches) {
+    const groups = this.groupByRound(matches);
+
+    return this.updateMatchesByGroup(groups, 0, leagueId, season)
+      .then((result) => this.get(leagueId, season));
+  }
+
+  updateMatchesByGroup(groups, index, leagueId, season) {
+    if (index === groups.length) return Promise.resolve(true);
+
+    const matches = groups[index];
+
     return Promise.all(
       matches.map((match) => {
         return this.update({
@@ -259,9 +280,8 @@ class Leaderboard {
           console.log('Update Match FAILED !!!');
         }
       }
-      return this.refreshStanding(leagueId);
-    })
-    .then((result) => this.get(leagueId, season));
+      return this.updateMatchesByGroup(groups, index + 1, leagueId, season);
+    });
   }
 
   /**

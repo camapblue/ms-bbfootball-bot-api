@@ -33,7 +33,10 @@ module.exports = {
               .example('3'),
             startTime: Joi.number().required()
               .description('Timestamp of start time of the match')
-              .example('1509524904')
+              .example('1509524904'),
+            round: Joi.number()
+              .description('Round of match')
+              .example('1')
           })
         ).min(1)
         .required()
