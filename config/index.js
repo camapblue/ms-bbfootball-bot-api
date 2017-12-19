@@ -1,3 +1,5 @@
+// import { process } from 'joi/lib/errors';
+
 const Confidence = require('confidence');
 const pkg = require('../package.json');
 
@@ -32,6 +34,10 @@ const config = {
       password: process.env.DB_PASSWORD,
       debug: process.env.DB_DEBUG || false,
       db_uri: process.env.MONGODB_URI
+    },
+    bot: {
+      settingsHost: process.env.SETTINGS_HOST || 'https://graph.facebook.com/v2.6/me/messenger_profile',
+      pageAccessToken: process.env.PAGE_ACCESS_TOKEN || 'EAASTRYFJ6pMBADdDnovcHX6D85ABYjBwrQkxgqKceHcltGqLvuh7uW4wvNQXARaxPNwowsNbjCbYzZBp2wmjghFkNsZBtUDBFxDyvGiqeC7lTC03mtMHmeJjdpZBSAAqUYtGAt857tQaumUSZA5tGKQ8FgOItcoHYJxcN2TIJQZDZD'
     }
   }
 };

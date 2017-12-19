@@ -17,8 +17,12 @@ exports.register = (server, opts, next) => {
     transports: [new transports.Console()]
   });
 
+  const { config } = opts;
+  const { bot } = config.resources;
+
   server.ext('onPreHandler', (request, reply) => {
     request.server.logger = logger;
+    request.server.bot = bot;
     Object.assign(request.server);
     reply.continue();
   });

@@ -3,20 +3,17 @@ const Joi = require('joi');
 
 module.exports = {
   method: 'POST',
-  path: '/chat',
+  path: '/start',
   config: {
     tags: ['api'],
-    description: 'This api for sending a message to facebook user',
+    description: 'This api for update start button action in chat bot',
     notes: 'Start chatting to facebook user',
     validate: {
       options: { allowUnknown: true },
       payload: Joi.object().keys({
-        appFbId: Joi.string().required()
-          .description('App fb id')
-          .example('9001DJI000020'),
-        message: Joi.string().required()
-          .description('Message for chatting')
-          .example('Hey, what\'s up?')
+        payload: Joi.string().required()
+          .description('Chat bot start payload')
+          .example('hello world')
       }).label('Chat payload')
     },
     plugins: {
@@ -32,9 +29,9 @@ module.exports = {
       const { server: { logger, bot } } = req;
 
       const chat = new Chat({ logger, bot });
-      const { appFbId, message } = req.payload;
+      const { payload } = req.payload;
 
-      return chat.chatTo({ appFbId, message })
+      return chat.updateStartButton({ payload })
         .then(res => reply(res));
     }
   }

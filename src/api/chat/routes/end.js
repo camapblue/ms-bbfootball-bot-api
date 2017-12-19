@@ -2,22 +2,14 @@ const Chat = require('../models/chat');
 const Joi = require('joi');
 
 module.exports = {
-  method: 'POST',
-  path: '/chat',
+  method: 'DELETE',
+  path: '/start',
   config: {
     tags: ['api'],
-    description: 'This api for sending a message to facebook user',
+    description: 'This api for removing start button action in chat bot',
     notes: 'Start chatting to facebook user',
     validate: {
-      options: { allowUnknown: true },
-      payload: Joi.object().keys({
-        appFbId: Joi.string().required()
-          .description('App fb id')
-          .example('9001DJI000020'),
-        message: Joi.string().required()
-          .description('Message for chatting')
-          .example('Hey, what\'s up?')
-      }).label('Chat payload')
+      options: { allowUnknown: true }
     },
     plugins: {
       'hapi-swagger': {
@@ -32,9 +24,8 @@ module.exports = {
       const { server: { logger, bot } } = req;
 
       const chat = new Chat({ logger, bot });
-      const { appFbId, message } = req.payload;
 
-      return chat.chatTo({ appFbId, message })
+      return chat.removeStartButton()
         .then(res => reply(res));
     }
   }

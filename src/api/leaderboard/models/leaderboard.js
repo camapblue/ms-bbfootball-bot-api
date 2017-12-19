@@ -111,10 +111,10 @@ class Leaderboard {
     .then(([home, away, matchHome, matchAway]) => home && away && matchHome && matchAway);
   }
 
-  refreshStanding(leagueId) {
+  refreshStanding(leagueId, season) {
     let index = 0;
     return new Promise((resolve, reject) => {
-      this.Leaderboard.find({ leagueId })
+      this.Leaderboard.find({ leagueId, season })
       .sort({ points: -1, achievedGoals: -1, scored: -1 })
       .cursor()
       .on('data', (item) => {
@@ -163,7 +163,8 @@ class Leaderboard {
           reject();
         } else {
           const team = items[0];
-          const update = { 
+          const update = {
+            round: team.round + 1,
             scored: team.scored + scored,
             achievedGoals: team.achievedGoals + (scored - conceded),
             concededGoals: team.concededGoals + conceded,
@@ -257,7 +258,9 @@ class Leaderboard {
     const groups = this.groupByRound(matches);
 
     return this.updateMatchesByGroup(groups, 0, leagueId, season)
-      .then((result) => this.get(leagueId, season));
+      .then((result) => 
+        this.refreshStanding(leagueId, season)
+        .then((result) => this.get(leagueId, season)));
   }
 
   updateMatchesByGroup(groups, index, leagueId, season) {
@@ -293,7 +296,7 @@ class Leaderboard {
    ** @param {Number} awayGoals
    ** @param {Number} startTime
    */
-  update({ leagueId, season, homeId, homeGoals, awayId, awayGoals, startTime }) {
+  update({ leagueId, season, homeId, homeGoals, awayId, awayGoals, startTime, round }) {
     return Promise.all(
       [
         getLeagueById(leagueId),
@@ -304,35 +307,53 @@ class Leaderboard {
     )
     .then(([leagueData, homeData, awayData, existed]) => {
       if (existed) return false;
+      if (homeData === undefined || homeData === null) {
+        console.log('CANNOT FIND TEAM =', homeId);
+        return false;
+      }
+      if (awayData === undefined || awayData === null) {
+        console.log('CANNOT FIND TEAM =', awayId);
+        return false;
+      }
 
       const leagueName = JSON.parse(leagueData).name;
       const homeName = JSON.parse(homeData).name;
       const awayName = JSON.parse(awayData).name;
 
-      return this.Leaderboard.find({ leagueId, season, $or: [{ 'teamId': homeId }, { 'teamId': awayId }] },
-        (err, items) => {
-          if (err) {
-            this.logger.error('Something wrong when finding item!', err);
-            return Promise.resolve('ERROR NOW');
-          }
-          return items;
-        })
-      .then((items) => {
+      return Promise.all(
+        [
+          this.isTeamExited(leagueId, season, homeId),
+          this.isTeamExited(leagueId, season, awayId),
+        ]
+      )
+      .then(([homeExisted, awayExisted]) => {
         const match = { leagueId, leagueName, season, homeId, homeName, homeGoals, awayId, awayName, awayGoals, startTime };
-        if (items.length === 0) {
+        if (!homeExisted && !awayExisted) {
           return this.createNewLeaderboard(match);
         }
         const matchOfHomeEntity = this.initNewMatchOfHomeEntity(match);
         const matchOfAwayEntity = this.initNewMatchOfAwayEntity(match);
 
         return Promise.all([
-          this.updateHomeTeam(leagueId, season, homeId, homeGoals, awayGoals),
-          this.updateAwayTeam(leagueId, season, awayId, awayGoals, homeGoals),
+          homeExisted ? this.updateHomeTeam(leagueId, season, homeId, homeGoals, awayGoals) : this.initNewHomeEntity(match).save(),
+          awayExisted ? this.updateAwayTeam(leagueId, season, awayId, awayGoals, homeGoals) : this.initNewAwayEntity(match).save(),
           matchOfHomeEntity.save(),
           matchOfAwayEntity.save()
         ]).then(([home, away, matchHome, matchAway]) => home && away && matchHome && matchAway);
       });
     });
+  }
+
+  isTeamExited(leagueId, season, teamId) {
+    return this.Leaderboard.find({ leagueId, season, teamId },
+      (err, items) => {
+        if (err) {
+          this.logger.error('Something wrong when finding item!', err);
+          return Promise.resolve('ERROR NOW');
+        }
+        return items;
+      })
+      .then((items) => items.length > 0);
   }
 
   /**
