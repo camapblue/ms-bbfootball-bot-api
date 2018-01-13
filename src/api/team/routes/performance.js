@@ -30,11 +30,9 @@ module.exports = {
 
       const team = new Team({ logger, host, dbCon });
       const { teamId } = req.params;
-      console.log('QUERY = ', req.query);
       const { number } = req.query;
-      console.log('NUMBER = ', number);
-
-      return team.performance({ teamId, numberMatches: number !== undefined ? number : 5 })
+      
+      return team.performance({ teamId, numberMatches: number !== undefined ? parseInt(number) : 5 })
         .then(res => reply(res));
     }
   }
