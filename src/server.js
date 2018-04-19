@@ -8,6 +8,7 @@ const link = require('./api/link');
 const leaderboard = require('./api/leaderboard');
 const league = require('./api/league');
 const team = require('./api/team');
+const exp = require('./api/exp');
 
 const server = new hapi.Server();
 
@@ -44,21 +45,28 @@ const plugins = [
   },
   {
     register: leaderboard,
-    select: ['api', 'docs', 'chat'],
+    select: ['api', 'docs', 'leaderboard'],
     options: {
       config: Config.get('/')
     }
   },
   {
     register: league,
-    select: ['api', 'docs', 'chat'],
+    select: ['api', 'docs', 'league'],
     options: {
       config: Config.get('/')
     }
   },
   {
     register: team,
-    select: ['api', 'docs', 'chat'],
+    select: ['api', 'docs', 'team'],
+    options: {
+      config: Config.get('/')
+    }
+  },
+  {
+    register: exp,
+    select: ['api', 'docs', 'exp'],
     options: {
       config: Config.get('/')
     }
