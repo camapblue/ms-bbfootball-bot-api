@@ -1,7 +1,10 @@
 // import { process } from 'joi/lib/errors';
+require('dotenv').config();
 
 const Confidence = require('confidence');
 const pkg = require('../package.json');
+
+console.log('ENV HOST = ', process.env.BBFOOTBALL_HOST);
 
 const config = {
   name: pkg.name,

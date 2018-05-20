@@ -16,7 +16,9 @@ class League {
   }
 
   update() {
-    return axios.get(`${this.host}league&info=all`, { headers: { version: '1.5.3' } })
+    let requestUrl = `${this.host}league&info=all`;
+    console.log('START UPDATE LEAGUE = ', requestUrl);
+    return axios.get(requestUrl, { headers: { version: '1.5.8' } })
     .then((res) => {
       console.log(res.data);
       const { leagues } = res.data;
