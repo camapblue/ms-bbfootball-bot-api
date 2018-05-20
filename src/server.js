@@ -9,6 +9,7 @@ const leaderboard = require('./api/leaderboard');
 const league = require('./api/league');
 const team = require('./api/team');
 const exp = require('./api/exp');
+const achievement = require('./api/achievement');
 
 const server = new hapi.Server();
 
@@ -66,6 +67,13 @@ const plugins = [
   },
   {
     register: exp,
+    select: ['api', 'docs', 'exp'],
+    options: {
+      config: Config.get('/')
+    }
+  },
+  {
+    register: achievement,
     select: ['api', 'docs', 'exp'],
     options: {
       config: Config.get('/')
