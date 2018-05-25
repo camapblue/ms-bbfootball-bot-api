@@ -20,8 +20,6 @@ module.exports = {
     handler: function (req, reply) {
       const { server: { logger, host } } = req;
 
-      console.log('HELLO WORLD');
-
       const achievement = new Achievement({ logger, host });
 
       return achievement.upToDate()
