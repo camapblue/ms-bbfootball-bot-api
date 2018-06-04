@@ -18,9 +18,9 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { server: { logger, host } } = req;
+      const { server: { logger, host, version } } = req;
 
-      const exp = new Exp({ logger, host });
+      const exp = new Exp({ logger, host, version });
 
       return exp.reset()
         .then(res => reply(res));

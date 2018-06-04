@@ -26,9 +26,9 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { server: { logger, host, dbCon } } = req;
+      const { server: { logger, host, version, dbCon } } = req;
 
-      const team = new Team({ logger, host, dbCon });
+      const team = new Team({ logger, host, version, dbCon });
       const { teamId } = req.params;
       const { number } = req.query;
       

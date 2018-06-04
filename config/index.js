@@ -19,7 +19,8 @@ const config = {
   },
   resources: {
     bbfootballConnector: {
-      host: process.env.BBFOOTBALL_HOST || 'https://bb-football-dev.appspot.com/service.php?nav='
+      host: process.env.BBFOOTBALL_HOST || 'https://bb-football-dev.appspot.com/service.php?nav=',
+      version: process.env.APP_VERSION || '1.6.3'
     },
     docker: {
       username: process.env.DOCKER_USERNAME || 'camapblue'

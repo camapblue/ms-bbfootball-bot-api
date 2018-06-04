@@ -18,9 +18,9 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { server: { logger, host } } = req;
+      const { server: { logger, host, version } } = req;
 
-      const achievement = new Achievement({ logger, host });
+      const achievement = new Achievement({ logger, host, version });
 
       return achievement.upToDate()
         .then(res => reply(res));

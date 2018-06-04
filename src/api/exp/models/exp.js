@@ -14,7 +14,7 @@ class Exp {
    * 
    */
   getAllUserIds() {
-    return axios.get(`${this.host}user&info=listIds`, { headers: { version: '1.5.8' } })
+    return axios.get(`${this.host}user&info=listIds`, { headers: { version: this.version } })
     .then((res) => {
       const { users } = res.data;
       return users;
@@ -40,7 +40,7 @@ class Exp {
 
     const userId = userIds[index];
     console.log('RESETING INDEX =', index, 'USER ID = ', userId);
-    return axios.get(`${this.host}user&action=resetData&user_id=${userId}`, { headers: { version: '1.5.8' } })
+    return axios.get(`${this.host}user&action=resetData&user_id=${userId}`, { headers: { version: this.version } })
     .then((res) => {
       console.log('RES = ', res.data);
       return this.resetUserExp(userIds, index + 1);

@@ -17,9 +17,9 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { server: { logger, host, dbCon } } = req;
+      const { server: { logger, host, version, dbCon } } = req;
 
-      const team = new Team({ logger, host, dbCon });
+      const team = new Team({ logger, host, version, dbCon });
       
       return team.update()
         .then(res => reply(res));

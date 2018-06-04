@@ -35,11 +35,11 @@
     "hapi-swagger": "^7.9.1",
     "inert": "^4.2.1",
     "joi": "^10.6.0",
-    "moment": "^2.20.1",
+    "moment": "^2.22.2",
     "mongoose": "4.9.5",
     "redis": "^2.6.5",
     "vision": "^4.1.1",
-    "winston": "^3.0.0-rc1"
+    "winston": "^3.0.0-rc6"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
@@ -54,6 +54,6 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.5.0",
     "runjs": "^4.3.0",
-    "webpack": "^3.10.0"
+    "webpack": "^3.12.0"
   }
 }
