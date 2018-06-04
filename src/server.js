@@ -13,6 +13,9 @@ const achievement = require('./api/achievement');
 
 const server = new hapi.Server();
 
+console.log('SERVICE HOST = ', Config.get('/host'));
+console.log('SERVICE PORT = ', Config.get('/port'));
+
 server.connection([
   {
     host: Config.get('/host'),

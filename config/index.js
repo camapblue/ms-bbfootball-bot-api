@@ -4,9 +4,6 @@ require('dotenv').config();
 const Confidence = require('confidence');
 const pkg = require('../package.json');
 
-console.log('SERVICE HOST = ', process.env.SERVICE_HOST);
-console.log('SERVICE PORT = ', process.env.SERVICE_PORT);
-
 const config = {
   name: pkg.name,
   description: pkg.description,
