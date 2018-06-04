@@ -8,7 +8,8 @@
     "dev": "backpack | bunyan",
     "lint": "eslint src test config",
     "heroku:build": "docker build -t registry.heroku.com/ms-bbfootball-bot-api/web .",
-    "heroku:push": "docker push registry.heroku.com/ms-bbfootball-bot-api/web"
+    "heroku:push": "docker push registry.heroku.com/ms-bbfootball-bot-api/web",
+    "heroku:release": "heroku container:release web -a ms-bbfootball-bot-api"
   },
   "author": "King Bon",
   "license": "ISC",
