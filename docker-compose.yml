@@ -5,7 +5,7 @@ services:
       context: .
       args:
         - SERVICE_NAME=ms-bbfootball-bot-api
-        - NPM_REGISTRY=ms-bbfootball-bot-api.herokuapp.com
+        - NPM_REGISTRY
         - NPM_TOKEN
         - HTTP_PROXY
         - HTTPS_PROXY
