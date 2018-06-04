@@ -1,5 +1,10 @@
-// import { process } from 'joi/lib/errors';
-require('dotenv').config();
+const result = require('dotenv').config();
+
+if (result.error) {
+  throw result.error
+}
+
+console.log(result.parsed)
 
 const Confidence = require('confidence');
 const pkg = require('../package.json');
