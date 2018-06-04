@@ -4,13 +4,14 @@ require('dotenv').config();
 const Confidence = require('confidence');
 const pkg = require('../package.json');
 
-console.log('ENV HOST = ', process.env.BBFOOTBALL_HOST);
+console.log('SERVICE HOST = ', process.env.SERVICE_HOST);
+console.log('SERVICE PORT = ', process.env.SERVICE_PORT);
 
 const config = {
   name: pkg.name,
   description: pkg.description,
   host: process.env.SERVICE_HOST || '0.0.0.0',
-  port: process.env.PORT || 3000,
+  port: process.env.SERVICE_PORT || 3000,
   api: {
     version: pkg.version
   },
@@ -20,7 +21,7 @@ const config = {
   resources: {
     bbfootballConnector: {
       host: process.env.BBFOOTBALL_HOST || 'https://bb-football-dev.appspot.com/service.php?nav=',
-      version: process.env.APP_VERSION || '1.6.3'
+      version: process.env.APP_VERSION || ''
     },
     docker: {
       username: process.env.DOCKER_USERNAME || 'camapblue'
