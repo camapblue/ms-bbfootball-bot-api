@@ -37,5 +37,5 @@ exports.register = (server, opts, next) => {
 };
 
 exports.register.attributes = {
-  name: 'league'
+  name: 'achievement'
 };

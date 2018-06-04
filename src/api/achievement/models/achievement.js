@@ -2,9 +2,9 @@ const axios = require('axios');
 
 /**
  * @class
- * @name Exp
+ * @name Achievement
  */
-class Exp {
+class Achievement {
 
   constructor(opts) {
     Object.assign(this, opts);
@@ -24,29 +24,30 @@ class Exp {
   /**
    * 
    */
-  reset() {
+  upToDate() {
     return this.getAllUserIds()
     .then(users => {
       const userIds = users.map(user => user.user_id);
-      return this.resetUserExp(userIds, 0);
+      console.log('TOTAL USER = ', userIds.length);
+      return this.upToDateUser(userIds, 0);
     });
   }
 
   /**
    * 
    */
-  resetUserExp(userIds, index) {
+  upToDateUser(userIds, index) {
     if (index === userIds.length) return Promise.resolve({ total: userIds.length });
 
     const userId = userIds[index];
-    console.log('RESETING INDEX =', index, 'USER ID = ', userId);
-    return axios.get(`${this.host}user&action=resetData&user_id=${userId}`, { headers: { version: this.version } })
+    console.log('UP TO DATE INDEX =', index, 'USER ID = ', userId);
+    return axios.get(`${this.host}user&action=upToDateAchievement&user_id=${userId}`, { headers: { version: this.version } })
     .then((res) => {
       console.log('RES = ', res.data);
-      return this.resetUserExp(userIds, index + 1);
+      return this.upToDateUser(userIds, index + 1);
     });
   }
 
 }
 
-module.exports = Exp;
+module.exports = Achievement;

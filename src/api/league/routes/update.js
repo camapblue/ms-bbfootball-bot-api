@@ -17,9 +17,9 @@ module.exports = {
       }
     },
     handler: function (req, reply) {
-      const { server: { logger, host } } = req;
+      const { server: { logger, host, version } } = req;
 
-      const league = new League({ logger, host });
+      const league = new League({ logger, host, version });
       
       return league.update()
         .then(res => reply(res));

@@ -17,7 +17,7 @@ class Team {
   /**
    */
   update() {
-    return axios.get(`${this.host}team&info=all`, { headers: { version: '1.5.8' } })
+    return axios.get(`${this.host}team&info=all`, { headers: { version: this.version } })
     .then((res) => {
       console.log(res.data);
       const { teams } = res.data;

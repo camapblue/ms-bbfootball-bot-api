@@ -11,7 +11,7 @@ internals.applyRoutes = (server, next) => {
 exports.register = (server, opts, next) => {
   const { config } = opts;
 
-  const { bbfootballConnector: { host } } = config.resources;
+  const { bbfootballConnector: { host, version } } = config.resources;
   
   const logger = createLogger({
     format: format.combine(
@@ -24,6 +24,7 @@ exports.register = (server, opts, next) => {
   server.ext('onPreHandler', (request, reply) => {
     request.server.logger = logger;
     request.server.host = host;
+    request.server.version = version;
     Object.assign(request.server);
     reply.continue();
   });

@@ -1,13 +1,13 @@
-const Exp = require('../models/exp');
+const Achievement = require('../models/achievement');
 const Joi = require('joi');
 
 module.exports = {
   method: 'POST',
-  path: '/exp/reset',
+  path: '/achievement/upToDate',
   config: {
     tags: ['api'],
-    description: 'This api for reset all exp data of all user',
-    notes: 'Reset all exp data for all user',
+    description: 'This api for up to date all achievement of particular user',
+    notes: 'Up to date achievement of particular user',
     plugins: {
       'hapi-swagger': {
         responses: {
@@ -20,9 +20,9 @@ module.exports = {
     handler: function (req, reply) {
       const { server: { logger, host, version } } = req;
 
-      const exp = new Exp({ logger, host, version });
+      const achievement = new Achievement({ logger, host, version });
 
-      return exp.reset()
+      return achievement.upToDate()
         .then(res => reply(res));
     }
   }
