@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 
 const Confidence = require('confidence');
 const pkg = require('../package.json');
