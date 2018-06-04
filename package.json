@@ -28,7 +28,7 @@
     "bunyan": "^1.8.12",
     "confidence": "^3.0.2",
     "crypto": "^0.0.3",
-    "dotenv": "^6.0.0",
+    "dotenv": "^5.0.1",
     "es6-error": "^4.0.2",
     "fcm-node": "^1.2.1",
     "hapi": "^16.6.2",
