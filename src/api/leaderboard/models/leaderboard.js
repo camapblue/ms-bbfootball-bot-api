@@ -187,7 +187,7 @@ class Leaderboard {
     (err, items) => {
       if (err) {
         this.logger.error('Something wrong when finding item!', err);
-        return Promise.resolve('ERROR NOW');
+        return Promise.resolve(false);
       }
       return items;
     }).then(found => found.length > 0);
