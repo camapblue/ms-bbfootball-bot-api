@@ -137,7 +137,7 @@ class Leaderboard {
           reject();
         } else {
           const team = items[0];
-          const update = { 
+          const update = {
             round: team.round + 1,
             scored: team.scored + scored,
             achievedGoals: team.achievedGoals + (scored - conceded),
@@ -213,7 +213,7 @@ class Leaderboard {
       groups.push(groupByMatches[key])
     });
     return groups;
-  }  
+  }
 
   /**
    ** @param {Number} leagueId
@@ -258,9 +258,12 @@ class Leaderboard {
     const groups = this.groupByRound(matches);
 
     return this.updateMatchesByGroup(groups, 0, leagueId, season)
-      .then((result) => 
+      .then((result) =>
         this.refreshStanding(leagueId, season)
-        .then((result) => this.get(leagueId, season)));
+        .then((result) => {
+          console.log("REFRESH STANDING RESULT =", result);
+          return this.get(leagueId, season);
+      }));
   }
 
   updateMatchesByGroup(groups, index, leagueId, season) {
@@ -307,6 +310,10 @@ class Leaderboard {
     )
     .then(([leagueData, homeData, awayData, existed]) => {
       if (existed) return false;
+      if (leagueData === undefined || leagueData === null) {
+        console.log('CANNOT FIND LEAGUE =', leagueId);
+        return false;
+      }
       if (homeData === undefined || homeData === null) {
         console.log('CANNOT FIND TEAM =', homeId);
         return false;
@@ -361,16 +368,18 @@ class Leaderboard {
    ** @param {String} season
    */
   get(leagueId, season) {
+    console.log('GET =', leagueId, ' SEASON =', season);
     return this.Leaderboard.find({ leagueId, season },
       (err, items) => {
         if (err) {
-          this.logger.error('Something wrong when finding item!', err);
+          console.log('Something wrong when finding item!', err);
           return Promise.resolve('ERROR NOW');
         }
         return items;
       })
     .sort({ 'standing': 1 })
     .then((items) => {
+      console.log('TOTAL =', items.length);
       let result = [];
       for (let i = 0; i < items.length; i += 1) {
         const item = items[i];
@@ -381,8 +390,7 @@ class Leaderboard {
             teamName: item.teamName,
             goals: item.achievedGoals,
             points: item.points,
-            round: item.round,
-            standing: item.standing
+            round: item.round
           }
         )
       }

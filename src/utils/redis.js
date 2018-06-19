@@ -61,6 +61,15 @@ const setLeague = (leagueId, data) => {
   ]);
 };
 
+// store league base on league id
+const deleteLeagues = (leagueIds) => {
+  return new Promise((resolve) => {
+    redis.hdel('BBFOOTBALL_LEAGUE', leagueIds, function (e, r) {
+      resolve(true);
+    });
+  });
+};
+
 // get all available league
 const getLeagues = () => {
   return new Promise((resolve) => {
@@ -103,6 +112,7 @@ module.exports = {
   setBotFbId,
   getBotFbId,
   setLeague,
+  deleteLeagues,
   getLeagueById,
   getLeagues,
   setTeam,
