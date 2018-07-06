@@ -74,7 +74,11 @@ const deleteLeagues = (leagueIds) => {
 const getLeagues = () => {
   return new Promise((resolve) => {
     redis.hgetall('BBFOOTBALL_LEAGUE', (err, leagues) => {
-      resolve(leagues);
+      if (leagues === null) {
+        resolve([]);
+      } else {
+        resolve(leagues);
+      }
     });
   });
 }

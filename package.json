@@ -9,7 +9,10 @@
     "lint": "eslint src test config",
     "heroku:build": "docker build -t registry.heroku.com/ms-bbfootball-bot-api/web .",
     "heroku:push": "docker push registry.heroku.com/ms-bbfootball-bot-api/web",
-    "heroku:release": "heroku container:release web -a ms-bbfootball-bot-api"
+    "heroku:release": "heroku container:release web -a ms-bbfootball-bot-api",
+    "heroku:build:dev": "docker build -t registry.heroku.com/ms-dev-bbfootball-bot-api/web .",
+    "heroku:push:dev": "docker push registry.heroku.com/ms-dev-bbfootball-bot-api/web",
+    "heroku:release:dev": "heroku container:release web -a ms-dev-bbfootball-bot-api"
   },
   "author": "King Bon",
   "license": "ISC",

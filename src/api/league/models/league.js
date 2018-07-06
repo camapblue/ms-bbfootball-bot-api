@@ -21,9 +21,7 @@ class League {
     .then(leagues => {
       return deleteLeagues(Object.keys(leagues))
       .then(result => {
-        console.log('RESULT =', result);
         let requestUrl = `${this.host}league&info=all`;
-        console.log('REQUEST URL =', requestUrl);
         return axios.get(requestUrl, { headers: { version: this.version } })
         .then((res) => {
           console.log(res.data);
@@ -51,6 +49,8 @@ class League {
             return true;
           })
         });
+      }).catch(error => {
+        console.log('DELETE ERRORS =', error);
       });
     });
   }
@@ -66,6 +66,9 @@ class League {
         })
       });
       return result;
+    })
+    .catch(error => {
+      console.log('GET LEAGUES ERROR =', error);
     });
   }
 }

@@ -19,7 +19,7 @@ class Team {
   update() {
     return axios.get(`${this.host}team&info=all`, { headers: { version: this.version } })
     .then((res) => {
-      console.log(res.data);
+      // console.log(res.data);
       const { teams } = res.data;
       return Promise.all(
         teams.map((team) => {
@@ -36,12 +36,16 @@ class Team {
         })
       )
       .then((results) => {
+        console.log('SET TEAM RESULTS =', results.length);
         for (let i = 0; i < results; i += 1) {
           if (results[i] === false) {
             console.log('Update Team FAILED !!!');
           }
         }
         return true;
+      })
+      .catch(error => {
+        console.log('UPDATE TEAM ERROR =', error);
       })
     });
   }

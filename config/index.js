@@ -3,6 +3,11 @@
 const Confidence = require('confidence');
 const pkg = require('../package.json');
 
+console.log('BB FOOTBALL HOST = ', process.env.BBFOOTBALL_HOST);
+console.log('APP VERSION = ', process.env.APP_VERSION);
+console.log('REDIS URL = ', process.env.REDIS_URL);
+console.log('MONGODB URL = ', process.env.MONGODB_URI);
+
 const config = {
   name: pkg.name,
   description: pkg.description,
@@ -16,8 +21,8 @@ const config = {
   },
   resources: {
     bbfootballConnector: {
-      host: process.env.BBFOOTBALL_HOST || 'http://bbfootball.net/service.php?nav=',
-      version: process.env.APP_VERSION || '1.7.1'
+      host: process.env.BBFOOTBALL_HOST || 'https://bb-football-dev.appspot.com/service.php?nav=',
+      version: process.env.APP_VERSION || '1.7.3'
     },
     docker: {
       username: process.env.DOCKER_USERNAME || 'camapblue'
@@ -34,7 +39,7 @@ const config = {
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       debug: process.env.DB_DEBUG || false,
-      db_uri: process.env.MONGODB_URI || 'mongodb://heroku_dq511ggk:m9s43o05air6282dhg16jcirk8@ds247830.mlab.com:47830/heroku_dq511ggk'
+      db_uri: process.env.MONGODB_URI
     },
     bot: {
       settingsHost: process.env.SETTINGS_HOST || 'https://graph.facebook.com/v2.6/me/messenger_profile',
