@@ -19,6 +19,7 @@ class League {
   update() {
     return getLeagues()
     .then(leagues => {
+      console.log('Start UPDATE LEAGUES');
       return deleteLeagues(Object.keys(leagues))
       .then(result => {
         let requestUrl = `${this.host}league&info=all`;
@@ -56,8 +57,10 @@ class League {
   }
 
   get() {
+    console.log('Start GET ALL LEAGUES');
     return getLeagues()
     .then(leagues => {
+      console.log('LEAGUES = ', leagues);
       let result = [];
       Object.keys(leagues).forEach(leagueId => {
         result.push({

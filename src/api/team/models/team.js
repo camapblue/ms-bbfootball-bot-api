@@ -19,7 +19,7 @@ class Team {
   update() {
     return axios.get(`${this.host}team&info=all`, { headers: { version: this.version } })
     .then((res) => {
-      // console.log(res.data);
+      console.log(res.data);
       const { teams } = res.data;
       return Promise.all(
         teams.map((team) => {

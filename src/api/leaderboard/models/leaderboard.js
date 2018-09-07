@@ -220,6 +220,7 @@ class Leaderboard {
    ** @param {String} season
    */
   reset(leagueId, season) {
+    console.log('Start RESET LEAGUE = ', leagueId, ' SEASON = ', season);
     return this.Leaderboard.find({ leagueId, season },
     (err, items) => {
       if (err) {
