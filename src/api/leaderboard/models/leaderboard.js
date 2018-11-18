@@ -398,6 +398,40 @@ class Leaderboard {
       return Promise.resolve({ leaderboard: result });
     });
   }
+
+  /**
+   ** @param {Number} leagueId
+   ** @param {String} season
+   ** @param {Number} teamId
+   ** @param {Number} point
+   */
+  forceToUpdateTeamPoint(leagueId, season, teamId, point) {
+    console.log("FORCE TO UPDATE TEAM POINT = ", point);
+    return new Promise((resolve, reject) => {
+      this.Leaderboard.find({ leagueId, season, teamId })
+      .then((items) => {
+        if (items.length !== 1) {
+          reject();
+        } else {
+          const team = items[0];
+          const update = {
+            points: team.points + point
+          };
+          this.Leaderboard.update({ _id: team._id }, { $set: update }, { multi: true }, (err, numAffected) => {
+            resolve(true);
+          });
+        }
+      })
+    })
+    .then((result) => {
+      console.log("PREPARE REFRESH STANDING = ", result);
+      return this.refreshStanding(leagueId, season)
+      .then((result) => {
+        console.log("REFRESH STANDING RESULT =", result);
+        return this.get(leagueId, season);
+      })
+    });
+  }
 }
 
 module.exports = Leaderboard;

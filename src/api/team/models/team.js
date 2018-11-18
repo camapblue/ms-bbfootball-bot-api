@@ -1,7 +1,7 @@
 const axios = require('axios');
 const {
   setTeam,
-  getTeamById
+  getTeams
 } = require('../../../utils/redis');
 
 /**
@@ -69,6 +69,74 @@ class Team {
             performance += match.result + ' ';   
           }
           resolve({ performance });
+        });
+    });
+  }
+
+  /**
+   ** @param {String} season
+   */
+  statistic(season) {
+    return getTeams()
+    .then(teams => {
+      let teamIds = [];
+      Object.keys(teams).forEach(teamId => {
+        teamIds.push({
+          teamId,
+          season
+        })
+      });
+      
+      return Promise.all(
+        teamIds.map((teamId) => {
+          return this.teamStatisticInSeason(teamId);
+        })
+      ).then((results) => {
+        return { statistic: results.filter(team => team.totalMatch > 0)};
+      })
+    })
+    .catch(error => {
+      console.log('GET TEAMS ERROR =', error);
+    });
+  }
+
+  teamStatisticInSeason({ teamId, season }) {
+    const MatchOfTeam = this.dbCon.db.model(`Team_${teamId}`, this.dbCon.dbSchema.match);
+
+    // get number of latest matches
+    return new Promise((resolve, reject) => {
+      MatchOfTeam.find({ season })
+        .then(items => {
+          let scored = 0;
+          let conceded = 0;
+          let teamName = "";
+          let totalMatch = items.length;
+          
+          for (let i = 0 ; i < totalMatch ; i++) {
+            const match = items[i];
+            if (match.homeId === teamId) {
+              if (teamName.length === 0) {
+                teamName = match.homeName;
+              }
+              scored += match.homeGoals;
+              conceded += match.awayGoals;
+            } else {
+              if (teamName.length === 0) {
+                teamName = match.awayName;
+              }
+              scored += match.awayGoals;
+              conceded += match.homeGoals;
+            }
+          }
+          resolve(
+            {
+              teamId: teamId,
+              teamName,
+              scored,
+              conceded,
+              totalMatch
+            }
+           );
         });
     });
   }

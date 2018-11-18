@@ -100,6 +100,18 @@ const setTeam = (teamId, data) => {
   ]);
 };
 
+const getTeams = () => {
+  return new Promise((resolve) => {
+    redis.hgetall('BBFOOTBALL_TEAM', (err, teams) => {
+      if (teams === null) {
+        resolve([]);
+      } else {
+        resolve(teams);
+      }
+    });
+  });
+}
+
 // get team data by team id
 const getTeamById = (teamId) => {
   return new Promise((resolve) => {
@@ -120,5 +132,6 @@ module.exports = {
   getLeagueById,
   getLeagues,
   setTeam,
+  getTeams,
   getTeamById
 };
