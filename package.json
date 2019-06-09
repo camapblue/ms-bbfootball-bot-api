@@ -3,16 +3,13 @@
   "version": "1.0.0",
   "description": "Microservice BBFootball Bot",
   "scripts": {
-    "start": "node ./build/main.js",
-    "build": "backpack build",
-    "dev": "backpack | bunyan",
+    "build": "yarn && backpack build",
+    "postinstall": "make install",
+    "start": "make start",
+    "begin": "make install && make start",
     "lint": "eslint src test config",
-    "heroku:build": "docker build -t registry.heroku.com/ms-bbfootball-bot-api/web .",
-    "heroku:push": "docker push registry.heroku.com/ms-bbfootball-bot-api/web",
-    "heroku:release": "heroku container:release web -a ms-bbfootball-bot-api",
-    "heroku:build:dev": "docker build -t registry.heroku.com/ms-dev-bbfootball-bot-api/web .",
-    "heroku:push:dev": "docker push registry.heroku.com/ms-dev-bbfootball-bot-api/web",
-    "heroku:release:dev": "heroku container:release web -a ms-dev-bbfootball-bot-api"
+    "deploy:dev": "ENV=dev make deploy-heroku-dev",
+    "deploy:pro": "ENV=production make deploy-heroku-pro"
   },
   "author": "King Bon",
   "license": "ISC",
@@ -22,28 +19,33 @@
     "heroku"
   ],
   "engines": {
-    "node": "6.11.0",
-    "npm": "^6.1.0"
+    "node": "11.5.0",
+    "npm": "^6.5.0"
   },
   "dependencies": {
-    "axios": "^0.16.2",
-    "backpack-core": "^0.4.3",
+    "axios": "^0.18.0",
+    "backpack-core": "^0.8.3",
     "bluebird": "^3.5.1",
-    "boom": "^5.2.0",
+    "boom": "^7.3.0",
     "bunyan": "^1.8.12",
-    "confidence": "^3.0.2",
-    "crypto": "^0.0.3",
-    "dotenv": "^5.0.1",
+    "confidence": "^4.0.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^7.0.0",
     "es6-error": "^4.0.2",
-    "fcm-node": "^1.2.1",
-    "hapi": "^16.6.2",
-    "hapi-swagger": "^7.9.1",
-    "inert": "^4.2.1",
-    "joi": "^10.6.0",
+    "firebase-admin": "^7.2.0",
+    "hapi": "^18.1.0",
+    "hapi-auth-bearer-token": "^6.1.1",
+    "hapi-swagger": "^9.4.1",
+    "i18n-2": "^0.7.3",
+    "inert": "^5.1.2",
+    "joi": "^14.3.1",
+    "lodash": "^4.17.11",
     "moment": "^2.22.2",
-    "mongoose": "4.9.5",
+    "mongoose": "^5.4.9",
+    "nodemailer": "^6.1.0",
+    "path": "^0.12.7",
     "redis": "^2.6.5",
-    "vision": "^4.1.1",
+    "vision": "^5.4.4",
     "winston": "^3.0.0-rc6"
   },
   "devDependencies": {
@@ -59,6 +61,6 @@
     "eslint-plugin-standard": "^3.0.1",
     "mocha": "^3.5.0",
     "runjs": "^4.3.0",
-    "webpack": "^3.12.0"
+    "webpack": "^4.29.1"
   }
 }

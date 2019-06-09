@@ -1,6 +1,6 @@
-const checkCode = require('./check-code');
-const generateCode = require('./generate-code');
-const storeBotFbId = require('./store-bot-fb-id');
+const checkCode = require('./checkCode');
+const generateCode = require('./generateCode');
+const storeBotFbId = require('./storeBotFbId');
 
 module.exports = [
   checkCode,

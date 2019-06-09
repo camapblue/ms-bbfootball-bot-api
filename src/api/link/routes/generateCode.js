@@ -1,5 +1,7 @@
-const BotUser = require('../models/bot-user');
+const BotUser = require('../models/botUser');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'POST',
@@ -28,14 +30,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger } } = req;
-
-      const botUser = new BotUser({ logger });
-      const { appFbId, username } = req.payload;
-
-      return botUser.generateCode({ appFbId, username })
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger }, payload: { appFbId, username } } = req;
+      try {
+        const botUser = new BotUser({ logger });
+        
+        return await botUser.generateCode({ appFbId, username });
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

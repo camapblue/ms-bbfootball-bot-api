@@ -1,9 +1,10 @@
 const Chat = require('../models/chat');
-const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'DELETE',
-  path: '/start',
+  path: '/chat/start',
   config: {
     tags: ['api'],
     description: 'This api for removing start button action in chat bot',
@@ -20,13 +21,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
+    handler: async (req, h) => {
       const { server: { logger, bot } } = req;
-
-      const chat = new Chat({ logger, bot });
-
-      return chat.removeStartButton()
-        .then(res => reply(res));
+      try {
+        const chat = new Chat({ logger, bot });
+        
+        return await chat.removeStartButton();
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

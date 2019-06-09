@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const LeaderboardSchema = require('../db/schemas/leaderboard-schema');
 const MatchSchema = require('../db/schemas/match-schema');
+const LeaderboardSchema = require('../db/schemas/leaderboard-schema');
 
 const promiseLibrary = global.Promise;
 mongoose.Promise = promiseLibrary;
@@ -16,7 +16,7 @@ class DBConnector {
     const {
       hostname, port, database, username, password, db_uri
     } = opts;
-    console.log('DB URI =', db_uri);
+    // console.log('DB URI =', db_uri);
 
     mongoose.set('debug', opts.debug);
     this.db = mongoose;
@@ -32,13 +32,12 @@ class DBConnector {
   connect() {
     let connectionURI = this.dbURI;
     if (connectionURI === undefined) {
-      console.log('CONNECTION DB =', this.hostname, ' PORT =', this.port, ' DATABASE =', this.database);
       connectionURI = `mongodb://${this.hostname}:${this.port}/${this.database}`;
     };
     const options = {
       user: this.user,
       pass: this.pass,
-      useMongoClient: true,
+      useNewUrlParser: true,
       promiseLibrary
     };
 
@@ -46,9 +45,14 @@ class DBConnector {
       return Promise.resolve();
     }
 
-    return this.db.connect(connectionURI, options, () => {})
-    .then(() => {
-      return Promise.resolve();
+    console.log('CONNECTION URI =', connectionURI);
+    return this.db.connect(connectionURI, options, (e) => {
+      if (e !== null) {
+        console.log('CONNECT TO DB GET ERROR =', e);
+        return Promise.reject(new InvalidOperationError(`ERROR connecting to database: ${connectionURI}`));
+      } else {
+        console.log('START CONNECT TO DB SUCCESSFUL');
+      }
     })
     .catch(() => {
       return Promise.reject(new InvalidOperationError(`ERROR connecting to database: ${connectionURI}`));
@@ -57,8 +61,23 @@ class DBConnector {
 
   createSchemas() {
     this.dbSchema = {};
-    this.dbSchema.leaderboard = new LeaderboardSchema(mongoose);
-    this.dbSchema.match = new MatchSchema(mongoose);
+    this.dbSchema.match = new MatchSchema(this.db);
+    this.dbSchema.leaderboard = new LeaderboardSchema(this.db);
+  }
+
+  getModel(key, schema = null) {
+    let model = null;
+    try {
+      model = this.db.model(key);
+    } catch (e) {
+      if (schema !== null) {
+        model = this.db.model(key, schema);
+      } else {
+        model = this.db.model(key, this.dbSchema[`${key}`]);
+      }
+    } finally {
+      return model;
+    }
   }
 }
 

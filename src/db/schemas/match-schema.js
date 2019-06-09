@@ -1,7 +1,7 @@
 /**
- * Class that wrap db leader board schema
+ * Class that wrap db match schema
  *
- * @class LeaderboardSchema
+ * @class MatchSchema
  */
 class MatchSchema {
     constructor(db) {

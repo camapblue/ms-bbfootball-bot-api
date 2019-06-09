@@ -1,5 +1,7 @@
 const Leaderboard = require('../models/leaderboard');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'POST',
@@ -51,14 +53,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger, dbCon } } = req;
-
-      const leaderboard = new Leaderboard({ logger, dbCon });
-      const { leagueId, season, matches } = req.payload;
-
-      return leaderboard.updateMatches(leagueId, season, matches)
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger, dbCon }, payload: { leagueId, season, matches } } = req;
+      try {
+        const leaderboard = new Leaderboard({ logger, dbCon });
+        
+        return await leaderboard.updateMatches(leagueId, season, matches);
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

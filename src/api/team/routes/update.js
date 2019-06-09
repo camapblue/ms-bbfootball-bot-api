@@ -1,4 +1,6 @@
 const Team = require('../models/team');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'POST',
@@ -16,13 +18,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
+    handler: async (req, h) => {
       const { server: { logger, host, version, dbCon } } = req;
-
-      const team = new Team({ logger, host, version, dbCon });
-      
-      return team.update()
-        .then(res => reply(res));
+      try {
+        const team = new Team({ logger, host, version, dbCon });
+        
+        return await team.update();
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

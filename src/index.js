@@ -2,19 +2,17 @@
 //
 
 // Application entrypoint. Actually starts the server.
-const server = require('./server');
+const { server, plugins } = require('./server');
 
-// Start the server, detail out what's going on.
-server.start((startError) => {
-  if (startError) {
-    console.log(`An error occurred starting the server: ${startError}`);
-    throw startError;
-  }
+const init = async () => {
+  await server.register(plugins);
+  
+  await server.start();
+}
 
-  server.connections.forEach((conn) => {
-    const label = conn.settings.labels[0];
-    const { protocol, host, port } = conn.info;
-
-    console.log(`${label} running at: ${protocol}://${host}:${port}`);
-  });
+process.on('unhandledRejection', (err) => {
+  console.log(err);
+  process.exit(1);
 });
+
+init();

@@ -1,5 +1,7 @@
 const Team = require('../models/team');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'GET',
@@ -25,15 +27,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger, host, version, dbCon } } = req;
-
-      const team = new Team({ logger, host, version, dbCon });
-      const { teamId } = req.params;
-      const { number } = req.query;
-      
-      return team.performance({ teamId, numberMatches: number !== undefined ? parseInt(number) : 5 })
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger, host, version, dbCon }, params: { teamId }, query: { number } } = req;
+      try {
+        const team = new Team({ logger, host, version, dbCon });
+        
+        return await team.performance({ teamId, numberMatches: number !== undefined ? parseInt(number) : 5 });
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

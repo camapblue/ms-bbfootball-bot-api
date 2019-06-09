@@ -1,12 +1,14 @@
 const Chat = require('../models/chat');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'POST',
-  path: '/chat',
+  path: '/chat/to',
   config: {
     tags: ['api'],
-    description: 'This api for sending a message to facebook user',
+    description: 'This api aim to send a message to facebook user',
     notes: 'Start chatting to facebook user',
     validate: {
       options: { allowUnknown: true },
@@ -28,14 +30,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger, bot } } = req;
-
-      const chat = new Chat({ logger, bot });
-      const { appFbId, message } = req.payload;
-
-      return chat.chatTo({ appFbId, message })
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger, bot }, payload: { appFbId, message } } = req;
+      try {
+        const chat = new Chat({ logger, bot });
+        
+        return await chat.chatTo({ appFbId, message });
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

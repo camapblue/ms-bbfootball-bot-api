@@ -2,11 +2,7 @@
 
 const Confidence = require('confidence');
 const pkg = require('../package.json');
-
-console.log('BB FOOTBALL HOST = ', process.env.BBFOOTBALL_HOST);
-console.log('APP VERSION = ', process.env.APP_VERSION);
-console.log('REDIS URL = ', process.env.REDIS_URL);
-console.log('MONGODB URL = ', process.env.MONGODB_URI);
+const conf = require('./config');
 
 const config = {
   name: pkg.name,

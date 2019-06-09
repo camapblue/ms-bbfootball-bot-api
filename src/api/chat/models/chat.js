@@ -14,57 +14,50 @@ class Chat {
   }
 
   /**
-   ** @param {String} appFbId
-   ** @param {String} username
+   * @end-point /chat/to
+   * @param {String} appFbId
+   * @param {String} username
    */
-  chatTo({ appFbId, message }) {
-    return getBotFbId(appFbId)
-      .then(({ botFbId }) => {
-        // start chating with user
-        this.logger.info('Chat to BotFbId =', botFbId, ' and message: ', message);
-        return { success: true };
-      });
+  async chatTo({ appFbId, message }) {
+    const { botFbId } = await getBotFbId(appFbId);
+    this.logger.info('Chat to BotFbId =', botFbId, ' and message: ', message);
+
+    return { result: true };
   }
 
   /**
-   ** @param {String} payload
+   * @end-point POST /chat/start
+   * @param {String} payload
    */
-  updateStartButton({ payload }) {
-    return axios.post(`${this.bot.settingsHost}?access_token=${this.bot.pageAccessToken}`,
-      { 
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        'get_started': { 
-          'payload': payload
-        }
+  async updateStartButton({ payload }) {
+    const options = { 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      'get_started': { 
+        'payload': payload
       }
-    )
-    .then((res) => {
-      console.log('RESPONSE NOW', res.data);
-
-      return true;
-    }, (err) => {
-      console.log('ERROR: ', err);
-    });
+    };
+    const res = await axios.post(`${this.bot.settingsHost}?access_token=${this.bot.pageAccessToken}`, options);
+    console.log('RESPONSE NOW', res.data);
+    
+    return { result: true };
   }
 
-  removeStartButton() {
-    return axios.delete(`${this.bot.settingsHost}?access_token=${this.bot.pageAccessToken}`,
-      { 
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        'fields': ['get_started']
-      }
-    )
-    .then((res) => {
-      console.log('RESPONSE NOW', res.data);
+  /**
+   * @end-point DELETE /chat/start
+   */
+  async removeStartButton() {
+    const options = { 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      'fields': ['get_started']
+    };
+    const res = await axios.delete(`${this.bot.settingsHost}?access_token=${this.bot.pageAccessToken}`, options);
+    console.log('RESPONSE NOW', res.data);
 
-      return true;
-    }, (err) => {
-      console.log('ERROR: ', err);
-    });
+    return { result: true };
   }
 }
 

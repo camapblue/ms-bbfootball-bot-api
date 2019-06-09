@@ -1,4 +1,4 @@
-FROM node:6.11
+FROM node:11.5.0
 
 # Environment variables which handle runtime behaviour.
 ENV SERVICE_PORT 3000

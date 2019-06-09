@@ -1,39 +1,48 @@
 const Routes = require('./routes');
+const DBConnector = require('../../connector/db');
 const { createLogger, format, transports } = require('winston');
 
 const internals = {};
 
-internals.applyRoutes = (server, next) => {
+internals.applyRoutes = (server) => {
   server.route(Routes);
-  next();
 };
 
-exports.register = (server, opts, next) => {
-  const logger = createLogger({
-    format: format.combine(
-      format.splat(),
-      format.simple()
-    ),
-    transports: [new transports.Console()]
-  });
+exports.plugin = {
+  name: 'chat',
+  register: async function(server, opts) {
+    const { config } = opts;
+    const { bot } = config.resources;
+  
+    const dbCon = new DBConnector(config.resources.db);
+    dbCon.createSchemas();
 
-  const { config } = opts;
-  const { bot } = config.resources;
+    const logger = createLogger({
+      format: format.combine(
+        format.splat(),
+        format.simple()
+      ),
+      transports: [new transports.Console()]
+    });
 
-  server.ext('onPreHandler', (request, reply) => {
-    request.server.logger = logger;
-    request.server.bot = bot;
-    Object.assign(request.server);
-    reply.continue();
-  });
-
-  server.dependency([
-    'swagger'
-  ], internals.applyRoutes);
-
-  return next();
-};
-
-exports.register.attributes = {
-  name: 'chat'
+    server.ext('onPreHandler', async (request, h) => {
+      request.server.logger = logger;
+      request.server.bot = bot;
+      request.server.dbCon = dbCon;
+      Object.assign(request.server);
+      return h.continue;
+    });
+  
+    server.events.on('start', () => {
+      dbCon.connect()
+      .then(() => {})
+      .catch((err) => {
+        console.log('Couldn\'t connect to MongoDB. Error: ', err);
+      });
+    });
+  
+    server.dependency([
+      'swagger'
+    ], internals.applyRoutes);
+  }
 };

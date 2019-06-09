@@ -1,5 +1,7 @@
 const Team = require('../models/team');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'GET',
@@ -25,14 +27,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger, host, version, dbCon } } = req;
-
-      const team = new Team({ logger, host, version, dbCon });
-      const { season } = req.params;
-      
-      return team.statistic(season)
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger, host, version, dbCon }, params: { season } } = req;
+      try {
+        const team = new Team({ logger, host, version, dbCon });
+        
+        return await team.statistic(season);
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

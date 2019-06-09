@@ -1,4 +1,6 @@
 const League = require('../models/league');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'GET',
@@ -16,13 +18,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
+    handler: async (req, h) => {
       const { server: { logger, host, version } } = req;
-
-      const league = new League({ logger, host, version });
-      
-      return league.get()
-        .then(res => reply(res));
+      try {
+        const league = new League({ logger, host, version });
+        
+        return await league.get();
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };

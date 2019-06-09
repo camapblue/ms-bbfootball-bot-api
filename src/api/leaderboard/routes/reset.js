@@ -1,5 +1,7 @@
 const Leaderboard = require('../models/leaderboard');
 const Joi = require('joi');
+const Boom = require('boom');
+const { sendError } = require('../../../service/send-email');
 
 module.exports = {
   method: 'DELETE',
@@ -28,14 +30,16 @@ module.exports = {
         }
       }
     },
-    handler: function (req, reply) {
-      const { server: { logger, dbCon } } = req;
-
-      const leaderboard = new Leaderboard({ logger, dbCon });
-      const { leagueId, season } = req.params;
-
-      return leaderboard.reset(leagueId, season)
-        .then(res => reply(res));
+    handler: async (req, h) => {
+      const { server: { logger, dbCon }, params: { leagueId, season } } = req;
+      try {
+        const leaderboard = new Leaderboard({ logger, dbCon });
+        
+        return await leaderboard.reset(leagueId, season);
+      } catch ({ stack }) { 
+        sendError(req, stack);
+        throw Boom.notImplemented(stack);
+      }
     }
   }
 };
