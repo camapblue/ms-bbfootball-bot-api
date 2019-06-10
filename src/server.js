@@ -52,6 +52,13 @@ const plugins = [
     options: {
       config: Config.get('/')
     }
+  },
+  {
+    plugin: require('./api/match'),
+    select: ['api', 'docs', 'match'],
+    options: {
+      config: Config.get('/')
+    }
   }
 ];
 

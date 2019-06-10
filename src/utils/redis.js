@@ -121,6 +121,28 @@ const getTeamById = (teamId) => {
   });
 };
 
+// set match 
+const setLiveMatches = (matches) => {
+  const string = JSON.stringify(matches);
+  return redis.hmset([
+    'BBFOOTBALL_MATCH',
+    'LIVE', string
+  ]);
+};
+
+const getLiveMatches = () => {
+  return new Promise((resolve) => {
+    redis.hget('BBFOOTBALL_MATCH', 'LIVE', (err, data) => {
+      if (data === null) {
+        resolve([]);
+      } else {
+        const json = JSON.parse(data);
+        resolve(json);
+      }
+    });
+  });
+};
+
 module.exports = {
   setAppFbId,
   checkCodeNumber,
@@ -133,5 +155,7 @@ module.exports = {
   getLeagues,
   setTeam,
   getTeams,
-  getTeamById
+  getTeamById,
+  setLiveMatches,
+  getLiveMatches
 };

@@ -2,7 +2,6 @@ const axios = require('axios');
 const {
   setLeague,
   deleteLeagues,
-  getLeagueById,
   getLeagues
 } = require('../../../utils/redis');
 

@@ -25,11 +25,13 @@ class Team {
         const {
           team_id,
           name,
-          short_name
+          short_name,
+          logo_url
         } = team;
         const data = JSON.stringify({
           name,
-          shortName: short_name
+          shortName: short_name,
+          logo_url
         });
         return setTeam(team_id, data);
       })
