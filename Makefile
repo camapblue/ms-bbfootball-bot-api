@@ -12,10 +12,11 @@ start:
 	backpack | bunyan
 
 deploy-heroku-dev:
-	# make setup-env
-	docker build -t registry.heroku.com/ms-dev-bbfootball-bot-api/web .
-	docker push registry.heroku.com/ms-dev-bbfootball-bot-api/web
-	heroku container:release web -a ms-dev-bbfootball-bot-api
+	# docker build -t registry.heroku.com/ms-dev-bbfootball-bot-api/web .
+	# docker push registry.heroku.com/ms-dev-bbfootball-bot-api/web
+	heroku container:push --recursive -a ms-dev-bbfootball-bot-api
+	heroku container:release web clock worker -a ms-dev-bbfootball-bot-api
+	heroku ps:scale clock=1 worker=1 -a ms-dev-bbfootball-bot-api
 
 deploy-heroku-pro:
 	# make setup-env
