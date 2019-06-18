@@ -131,12 +131,11 @@ class Leaderboard {
    * @function refresh standing
    */
   async refreshStanding(leagueId, season) {
-    let index = 0;
     const find = this.Leaderboard.find({ leagueId, season }).sort({ points: -1, achievedGoals: -1, scored: -1 }).lean();
     const items = await find.exec();
     let jobs = [];
     for (let i = 0 ; i < items.length ; i++) {
-      const update = this.Leaderboard.updateOne({ _id: items[i]._id }, { $set: { standing: index }});
+      const update = this.Leaderboard.updateOne({ _id: items[i]._id }, { $set: { standing: i + 1 }});
       jobs.push(update.exec());
     }
     const results = await doJobsInParallel(jobs);
@@ -275,7 +274,7 @@ class Leaderboard {
     const groups = this.groupByRound(matches);
 
     const result = await this.updateMatchesByGroup(groups, 0, leagueId, season);
-    await this.refreshStanding(leagueId, season)
+    const success = await this.refreshStanding(leagueId, season)
 
     const allMatches = await this.get(leagueId, season);
     return allMatches;

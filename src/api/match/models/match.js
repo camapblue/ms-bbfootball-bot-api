@@ -53,8 +53,8 @@ class Match {
       });
 
       leagues.push({
-        leagueId,
-        leagueName,
+        'league_id': leagueId,
+        'league_name': leagueName,
         matches
       });
     });
